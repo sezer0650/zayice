@@ -102,6 +102,9 @@ td.pos{color:var(--pos)}td.neg{color:var(--neg)}
 tr.msign td{color:#8a8070;font-size:13px}
 .wheel .pg.ast{font-size:13px;fill:#6b6352}
 details summary{cursor:pointer;color:var(--accent)}
+.ptq{border-left:4px solid var(--line);padding:6px 12px;margin:8px 0;background:#fbf6e8}.ptq.on{border-color:var(--gold);background:#f8edcf}.ptq.off{opacity:.78}
+.ptl{font-size:13px;color:var(--muted);margin-bottom:2px}
+.ptwhy{margin-top:10px;padding:10px 12px;border:1px dashed var(--line);border-radius:6px;font-size:14.5px}
 .moonbox{display:flex;gap:14px;align-items:center;border:1px solid var(--line);border-radius:6px;padding:10px;background:#fbf4e2}
 .hours{display:grid;grid-template-columns:repeat(6,1fr);gap:6px}
 @media(max-width:820px){.hours{grid-template-columns:repeat(3,1fr)}}
@@ -193,7 +196,7 @@ footer{text-align:center;font-size:12.5px;color:var(--muted);padding:10px}
     <div class="panel" id="p-karsilastirma"></div>
   </div>
 </main>
-<footer>Gezegen konumları astronomy-engine (MIT lisansı) ile hesaplanır; Swiss Ephemeris ile karşılaştırılarak doğrulanmıştır. Sürüm 4 · İnternetsiz çalışır.</footer>
+<footer>Gezegen konumları astronomy-engine (MIT lisansı) ile hesaplanır; Swiss Ephemeris ile karşılaştırılarak doğrulanmıştır. Sürüm 5 · İnternetsiz çalışır.</footer>
 <div id="updBar" class="upd" hidden>Yeni sürüm hazır. <button type="button" class="btn" id="updBtn">Yenile</button></div>
 <script>/*
  MIT
@@ -1681,6 +1684,167 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
   window.AstroSkyUI = { render, residence };
 })();
 </script>
+<script>/* Ptolemaios, Tetrabiblos III.13 "Ruhun Niteliği" — Robbins (Loeb, 1940) İngilizce çevirisinden Türkçeye tam çeviri.
+   Kaynak metin: skyscript.co.uk/tet3.html (kamuya açık). Global: AstroPtolemy */
+(function (root) {
+  const REF = 'Ptolemaios, Tetrabiblos III.13 "Ruhun Niteliği" (Robbins çevirisi, Loeb 1940, s. 332 vd.)';
+
+  const METHOD = [
+    'Bedensel hâllere dair inceleme, o hâlde, bu türden olur. Ruhun niteliklerinden akla ve zihne ilişkin olanlar, ilgili durumda gözlenen Merkür\'ün hâli aracılığıyla kavranır; duyusal ve akıl dışı kısmın nitelikleri ise iki ışıktan daha bedensel olanından, yani Ay\'dan ve onun ayrılışlarında ve yaklaşmalarında onunla görünüş (açı) içinde olan gezegenlerden bulunur. Ama ruhun dürtülerinin çeşitliliği büyük olduğundan, böyle bir incelemeyi basit ya da gelişigüzel bir biçimde değil, pek çok karmaşık gözlem aracılığıyla yapmamız akla uygundur. Çünkü Merkür\'ü ve Ay\'ı ya da onlara hâkim olan gezegenleri içeren burçlar arasındaki farklar ruhun karakterine çok katkıda bulunabilir; incelenen nitelik sınıfıyla ilgili gezegenlerin Güneş\'e ve köşelere gösterdikleri görünüşler de öyle; ve ayrıca her bir gezegenin, ruhun hareketleriyle ilgili o kendine özgü doğal niteliği de.',
+    'Genel olarak burçlardan dönencel (öncü) burçlar halkla iş görmeye yatkın, karışıklığı ve siyasi faaliyeti seven, ayrıca şan peşinde koşan ve tanrılara özen gösteren, soylu, hareketli, meraklı, buluşçu, tahminde iyi, astrolojiye ve kehanete yatkın ruhlar üretir. Çift bedenli (değişken) burçlar ruhları karmaşık, değişken, kavranması güç, hafif, kararsız, dönek, âşık, çok yönlü, müziği seven, tembel, kolayca edinen, fikir değiştirmeye yatkın yapar. Katı (sabit) burçlar onları adil, dalkavukluktan etkilenmeyen, sebatkâr, sağlam, zeki, sabırlı, çalışkan, sert, kendine hâkim, kinini bırakmayan, zorla para sızdıran, kavgacı, hırslı, hizipçi, açgözlü, katı, eğilmez yapar.',
+    'Konumlardan, doğuda ve horoskopta (yükselende) bulunma, özellikle de kendi yüzünde (proper face) olanlar, cömert, sade, kendi bildiğini okuyan, güçlü, soylu, keskin, açık ruhlar üretir. Sabah duraklamaları ve göğün ortasında bulunma (kulminasyon) onları hesapçı, sabırlı, hafızası iyi, sağlam, zeki, yüce gönüllü, istediğini gerçekleştiren, eğilmez, gürbüz, kaba, kolay aldatılmayan, eleştirel, pratik, cezalandırmaya yatkın, anlayışla donatılmış yapar. Öne geçişler (presesyonlar) ve batışlar onları kolay değişen, kararsız, zayıf, emeğe dayanamayan, duygusal, alçakgönüllü, korkak, aldatıcı, zorba, donuk, kavrayışı yavaş, harekete geçirilmesi güç yapar. Akşam duraklamaları ve yerin altındaki göğün ortasında bulunma, ayrıca Merkür ve Venüs için gündüz akşam batışları ve gece sabah batışları, soylu ve bilge, ama hafızası orta, titiz olmayan ve emeği sevmeyen, buna karşın gizli şeylerin araştırıcısı ve bilinmeyenin peşinde olan ruhlar üretir; örneğin büyücüler, sırlara erenler, gök olaylarını inceleyenler, alet ve makine yapanlar, hokkabazlar, astrologlar, filozoflar, alamet okuyucuları, rüya yorumcuları ve benzerleri.',
+    'Buna ek olarak, ruhun yöneticileri, başta açıkladığımız gibi, kendi ya da yakın oldukları hanelerde veya hayyizlerde (sect) bulunduklarında, ruhun karakterlerini açık, engelsiz, kendiliğinden ve etkili kılarlar; özellikle aynı gezegenler iki yeri birden yönettiğinde, yani Merkür\'le herhangi bir görünüş içinde olduklarında ve Ay\'ın ayrılışını ya da yaklaşmasını tuttuklarında. Ama böyle yerleşmemiş, kendilerine yabancı yerlerde bulunuyorlarsa, kendi doğalarının özelliklerini ruhun etkin niteliği bakımından belirsiz, seçik olmayan, eksik ve etkisiz kılar. Bununla birlikte onlara hâkim olan ya da onları yenen gezegenlerin doğasının güçleri, kişiler üzerinde canlı ve zarar vericidir. Böylece kötücül gezegenlerin yakınlığı yüzünden adaletsiz ve kötü olan insanlar, o gezegenler güçlüyse, birbirlerine zarar verme dürtülerini kolay, engelsiz, güvenli ve onurlu bulurlar; ama karşı hayyizden gezegenlerce yenilmişlerse, uyuşuk, etkisiz ve kolayca cezalandırılan kimseler olurlar. Ve iyicil gezegenlerin söz konusu sınırlara yakınlığı yüzünden iyi ve adil olanlar, bu gezegenler yenilmemişse, kendileri mutlu olur, başkalarına iyilikleriyle iyi bir ün kazanır ve kimseden zarar görmeden kendi adaletlerinden faydalanmayı sürdürürler; ama iyi gezegenler karşıtlarınca baskı altındaysa, salt yumuşaklıkları, iyilikleri ve merhametleri yüzünden küçümsenir ve kınanırlar, hatta insanların çoğu tarafından kolayca haksızlığa uğrayabilirler.',
+    'Karakter hakkındaki genel inceleme yöntemi, o hâlde, budur. Şimdi sırasıyla, bu tür hâkimiyette gezegenlerin bizzat doğasından doğan özel nitelikleri, karışım kuramı en önemli yönleriyle ele alınıncaya dek kısaca inceleyeceğiz.'
+  ];
+
+  const SIGN_TYPES = {
+    oncu: 'Dönencel (öncü) burçlar halkla iş görmeye yatkın, karışıklığı ve siyasi faaliyeti seven, ayrıca şan peşinde koşan ve tanrılara özen gösteren, soylu, hareketli, meraklı, buluşçu, tahminde iyi, astrolojiye ve kehanete yatkın ruhlar üretir.',
+    degisken: 'Çift bedenli (değişken) burçlar ruhları karmaşık, değişken, kavranması güç, hafif, kararsız, dönek, âşık, çok yönlü, müziği seven, tembel, kolayca edinen, fikir değiştirmeye yatkın yapar.',
+    sabit: 'Katı (sabit) burçlar onları adil, dalkavukluktan etkilenmeyen, sebatkâr, sağlam, zeki, sabırlı, çalışkan, sert, kendine hâkim, kinini bırakmayan, zorla para sızdıran, kavgacı, hırslı, hizipçi, açgözlü, katı, eğilmez yapar.'
+  };
+
+  /* Tekil gezegenler ve çiftler: [iyi konumda, kötü konumda] */
+  const SINGLE = {
+    saturn: ['Satürn ruhun tek yöneticisiyse ve Merkür\'e ve Ay\'a hâkimse, evrene ve köşelere göre itibarlı bir konumu varsa, kişileri bedeni seven, güçlü iradeli, derin düşünen, sert, tek amaçlı, çok çalışan, buyurgan, cezalandırmaya hazır, mülkü seven, cimri, şiddetli, hazine biriktiren ve kıskanç yapar;',
+      'ama konumu bunun tersi ve itibarsızsa, onları pinti, küçük hesaplı, ruhça alçak, umursamaz, aşağılık fikirli, kötü niyetli, korkak, çekingen, kötü konuşan, yalnız, ağlamaklı, utanmaz, batıl inançlı; emeği seven, duygusuz, dostlarına karşı entrika kuran, kasvetli, bedenine hiç özen göstermeyen kimseler yapar.'],
+    jupiter: ['Ruhun hâkimiyeti yalnız Jüpiter\'deyse, itibarlı konumlarda kişileri yüce gönüllü, cömert, Tanrı\'dan korkan, onurlu, zevki seven, nazik, görkemli, eli açık, adil, yüksek fikirli, ağırbaşlı, kendi işine bakan, merhametli, tartışmayı seven, iyilikçi, sevecen, önderlik nitelikleri taşıyan kimseler yapar.',
+      'Karşıt türden bir konumda bulunursa, ruhlarını benzer gibi gösterir elbette, ama daha alçakgönüllülük, daha az göze çarpma ve daha zayıf muhakeme yönünde bir farkla. Örneğin yüce gönüllülük yerine savurganlık; tanrılara saygı yerine batıl inanç; alçakgönüllülük yerine korkaklık; ağırbaşlılık yerine kibir; nezaket yerine aptalca saflık; güzellik sevgisi yerine zevk düşkünlüğü; yüksek fikirlilik yerine budalalık; cömertlik yerine umursamazlık verir, ve benzerleri.'],
+    mars: ['Ruhun hâkimiyeti yalnız Mars\'a verilmişse, itibarlı bir konumda kişileri soylu, buyurgan, ateşli, asker ruhlu, çok yönlü, güçlü, atılgan, aceleci, söz dinlemez, umursamaz, inatçı, keskin, dik başlı, küçümseyen, zorba, faal, kolay öfkelenen, önderlik nitelikleri taşıyan kimseler yapar.',
+      'Karşıt türden bir konumda onları vahşi, küstah, kana susamış, karışıklık çıkaran, savurgan, ağzı bozuk, eli çabuk, düşüncesiz, sarhoş, yağmacı, kötülük eden, acımasız, huzursuz, deli, kendi akrabalarından nefret eden, dinsiz kimseler yapar.'],
+    venus: ['Ruhun hâkimiyetini yalnız Venüs alırsa, itibarlı bir konumda kişileri hoş, iyi, lüks düşkünü, güzel konuşan, temiz, neşeli, dansı seven, güzelliğe hevesli, kötülükten nefret eden, sanatları seven, gösterilere düşkün, edepli, sağlıklı, hoş rüyalar gören, sevecen, iyilikçi, merhametli, titiz, kolay barışan, başarılı ve genel olarak çekici kimseler yapar.',
+      'Karşıt konumda onları dikkatsiz, şehvetli, kadınsı, kadın gibi, ürkek, umursamaz, ahlakı bozuk, kınayıcı, önemsiz, ayıplanmayı hak eden kimseler yapar.'],
+    mercury: ['Merkür ruhun hâkimiyetini tek başına alırsa, itibarlı bir konumda onun altında doğanları bilge, kurnaz, düşünceli, bilgili, buluşçu, deneyimli, iyi hesapçı, doğayı araştıran, kuramsal düşünen, yetenekli, rekabetçi, iyilikçi, sağduyulu, tahminde iyi, matematikçi, sırlara katılan, amaçlarına ulaşmada başarılı kimseler yapar.',
+      'Karşıt konumda onları tam birer düzenbaz, aceleci, unutkan, düşüncesiz, hafif fikirli, dönek, fikir değiştirmeye yatkın, aptal dolandırıcılar, akılsız, günahkâr, yalancı, ayırt etmeyen, kararsız, güvenilmez, açgözlü, adaletsiz ve genel olarak muhakemesi oynak ve kötü işlere eğilimli kimseler yapar.']
+  };
+
+  const PAIR = {
+    'saturn+jupiter': ['Satürn, anlatılan biçimde Jüpiter\'le birleşmiş olarak, yine itibarlı konumlarda, kişileri iyi, büyüklerine saygılı, ağırbaşlı, soylu fikirli, yardımsever, eleştirel, mal mülkü seven, yüce gönüllü, cömert, iyi niyetli, dostlarını seven, yumuşak, bilge, sabırlı, filozofça yapar;',
+      'ama karşıt konumlarda onları kültürsüz, deli, kolay korkan, batıl inançlı, tapınak tapınak dolaşan, hastalıklarını herkesin önünde itiraf eden, kuşkucu, kendi çocuklarından nefret eden, dostsuz, evine kapanan, muhakemesiz, sadakatsiz, hilekârca aptal, zehirli dilli, ikiyüzlü, etkisiz, hırssız, fikir değiştirmeye yatkın, sert, konuşulması ya da yaklaşılması güç, temkinli, ama yine de aptal ve aşağılanmaya boyun eğen kimseler yapar.'],
+    'saturn+mars': ['Satürn, Mars\'la birleşmiş olarak, onurlu konumlarda kişileri ne iyi ne kötü, çalışkan, açık sözlü, baş belası, korkak palavracılar, davranışı sert, acımasız, küçümseyen, kaba, kavgacı, aceleci, düzensiz, aldatıcı, pusu kuran, öfkesini bırakmayan, yalvarmaya kulak asmayan, ayak takımına yaranan, zorba, açgözlü, yurttaşlardan nefret eden, çekişmeyi seven, kötü niyetli, iliklerine kadar kötü, faal, sabırsız, gürültücü, bayağı, övüngen, zarar verici, adaletsiz, hafife alınamayacak, insanlardan nefret eden, eğilmez, değişmez, her işe burnunu sokan, ama aynı zamanda becerikli ve pratik, rakiplerince alt edilemeyen ve genel olarak amaçlarına ulaşmada başarılı kimseler yapar.',
+      'Karşıt konumlarda kişilerini haydut, korsan, sahtekâr (karıştırıcı), utanç verici muameleye boyun eğen, alçakça kazanç peşinde koşan, tanrısız, sevgisiz, hakaret eden, kurnaz, hırsız, yalan yere yemin eden, katil, yasak yiyecekleri yiyen, kötülük eden, adam öldüren, zehirleyici, dinsiz, tapınak ve mezar soyguncusu ve tamamen ahlakı bozulmuş kimseler yapar.'],
+    'saturn+venus': ['Venüs\'le birleşmiş olarak onurlu konumlarda Satürn kişilerini kadın düşmanı, eskiyi seven, yalnız, karşılaşılması nahoş, hırssız, güzelden nefret eden, kıskanç, toplumsal ilişkilerde sert, arkadaş canlısı olmayan, fikirleri sabit, kehanet sahibi, dini ayinlere düşkün, sırları ve erginlenmeleri seven, kurban ayinleri yapan, mistik, din bağımlısı, ama ağırbaşlı ve saygılı; alçakgönüllü, filozofça, evlilikte sadık, kendine hâkim, hesapçı, temkinli, çabuk gücenen ve kıskançlıkla kolayca karısından şüphelenmeye sürüklenen kimseler yapar.',
+      'Karşıt türden konumlarda onları gevşek, şehvet düşkünü, alçakça işler yapan, cinsel ilişkilerde seçici olmayan ve kirli, iffetsiz, kadınları ve özellikle kendi akrabalarını aldatan, sağlıksız (çürük), kınayıcı, ahlakı bozuk, güzelden nefret eden, kusur bulan, kötü konuşan, sarhoş, köle ruhlu, sahtekâr, cinsel ilişkilerde yasa tanımayan, hem etken hem edilgen, hem doğal hem doğa dışı, ve bunları yaşı, mevkisi ya da yasa gereği yasak olanlarla ya da hayvanlarla aramaya istekli, dinsiz, tanrıları küçümseyen, sırlarla ve kutsal ayinlerle alay eden, tamamen inançsız, iftiracı, zehirleyici, hiçbir şeyden geri durmayan düzenbazlar yapar.'],
+    'saturn+mercury': ['Satürn, Merkür\'le yakınlık içinde, onurlu konumlarda kişilerini her işe karışan, meraklı, hukuk ve töre meselelerini araştıran, tıp sanatını seven, mistik, gizli ve saklı ayinlere katılan, mucize yapan, hileci, yalnızca günü yaşayan, işi kolay, iş yönetebilen, kurnaz, acı dilli, titiz, ölçülü, dost canlısı, pratik işleri seven, amaçlarına ulaşabilen kimseler yapar.',
+      'Onursuz konumlarda onları boş konuşan, kötü niyetli, ruhunda hiç merhamet olmayan, emeğe kendini vermiş, kendi akrabalarından nefret eden, eziyeti seven, kasvetli, gece dolaşan, pusu kuran, hain, duygudaşlık göstermeyen, hırsız, büyücü, zehirleyici, sahtekâr, vicdansız, talihsiz ve çoğu zaman başarısız kimseler yapar.'],
+    'jupiter+mars': ['Jüpiter, Mars\'la birleşmiş olarak, onurlu konumlarda kişilerini kaba, kavgacı, asker ruhlu, yönetici, huzursuz, söz dinlemez, ateşli, gözü kara, pratik, açık sözlü, eleştirel, etkili, çekişmeci, buyurgan, entrikaya yatkın, saygın, erkeksi, zaferi seven, ama yüce gönüllü, hırslı, tutkulu, sağduyulu, başarılı kimseler yapar.',
+      'Karşıt konumda onları küstah, ayırt etmeyen, vahşi, yatıştırılamaz, fitneci, çekişmeci, inatçı, iftiracı, kibirli, cimri, yağmacı, çabuk değişen, hafif, kolay fikir değiştiren, kararsız, dik başlı, güvenilmez, muhakemesi zayıf, duygusuz, heyecanlı, faal, mızmız, savurgan, dedikoducu ve her bakımdan dengesiz ve kolay kızışan kimseler yapar.'],
+    'jupiter+venus': ['Jüpiter, Venüs\'le birleşmiş olarak, onurlu konumlarda kişilerini temiz, zevki seven, güzeli, çocukları, gösterileri ve Müzlerin alanını seven, şarkı söyleyen, kendilerini yetiştirenlere düşkün, iyi karakterli, iyilikçi, merhametli, saf (hilesiz), dindar, idmana yatkın, rekabeti seven, bilge, sevecen, ağırbaşlı bir biçimde çekici, yüce gönüllü, adil, hayırsever, öğrenmeyi seven, muhakemesi iyi, aşk konularında ölçülü ve edepli, akrabalarını seven, dindar, adil, hırslı, şan peşinde koşan ve genel olarak centilmen kimseler yapar.',
+      'Karşıt konumlarda onları lüks düşkünü, yumuşak yaşayan, kadınsı, dansı seven, ruhça kadın gibi, harcamada savurgan, kadınlarla ilişkilerde kötü, erotik, şehvet düşkünü, zampara, iftiracı, zina eden, süsü seven, epey yumuşak, tembel, sefih, kusur bulmaya düşkün, tutkulu, kendini süsleyen, kadın gibi düşünen, dini ayinlere düşkün, pezevenk, sırlara (gizem ayinlerine) devam eden, ama yine de güvenilir ve düzenbaz olmayan, aksine nazik, yaklaşılması kolay ve neşeli, ve felakette cömertliğe eğilimli kimseler yapar.'],
+    'jupiter+mercury': ['Jüpiter, Merkür\'le birleşmiş olarak, onurlu konumlarda kişilerini bilgili, tartışmayı seven, geometrici, matematikçi, şair, hatip, yetenekli, ölçülü, aklı iyi, öğüdü iyi, devlet adamı, hayırsever, yönetici, iyi huylu, cömert, halkı seven, kurnaz, başarılı, önder, saygılı, dindar, işte becerikli, sevecen, kendi akrabalarını seven, iyi yetişmiş, filozofça, ağırbaşlı kimseler yapar.',
+      'Karşıt konumlarda onları saf, geveze, hata yapmaya yatkın, küçümsenecek, bağnaz, dinsel coşku düşkünü, saçma konuşan, acılığa eğilimli, bilgelik taslayan, aptal, övüngen, öğrenci, büyücü, biraz aklı karışık, ama bilgili, hafızası iyi, öğretmen ve arzularında temiz kimseler yapar.'],
+    'mars+venus': ['Venüs\'le birleşmiş olarak, onurlu konumlarda, Mars kişilerini hoş, neşeli, dost canlısı, yumuşak yaşayan, mutlu, oyunbaz, hilesiz, zarif, dansı seven, erotik, sanatçı, taklitçi, zevk düşkünü, kendine mülk edinebilen, erkeksi ve aşk konularında yanlış davranışa yatkın, ama yine de başarılı, ihtiyatlı ve aklı başında, suçu kanıtlanması güç ve ketum, ayrıca hem genç erkeklere hem genç kadınlara tutkuyla bağlanan, savurgan, çabuk öfkelenen ve kıskanç kimseler yapar.',
+      'Ters konumlarda onları yan bakan, şehvet düşkünü, sefih, umursamaz, iftiracı, zina eden, küstah, yalancı, aldatıcı, hem kendi ailesinden hem başkalarının ailesinden olanları baştan çıkaran, aynı zamanda keskin ve zevke doymak bilmeyen, kadınları ve kızları baştan çıkaran, atılgan, ateşli, söz dinlemez, hain, yalan yere yemin eden, kolay etkilenen ve aklı sağlıklı olmayan, ama bazen yine sefih, süse düşkün, cüretkâr, alçakça işlere eğilimli ve utanmaz kimseler yapar.'],
+    'mars+mercury': ['Merkür\'le birleşmiş olarak, onurlu konumlarda Mars kişilerini ordu komutanı, becerikli, dinç, faal, hafife alınamayacak, çaresi tükenmez, buluşçu, safsatacı, titiz, düzenbaz, konuşkan, kavgacı, hilekâr, kararsız, sistemli çalışan, kötü sanatlar uygulayan, keskin zekâlı, aldatıcı, ikiyüzlü, sinsi, kötü karakterli, her işe karışan, düzenbazlığa eğilimli ama yine de başarılı ve kendileri gibi kimselerle sözleşmeye ve sözüne sadık kalabilen, genel olarak düşmanlarına zarar veren ve dostlarına yardım eden kimseler yapar.',
+      'Karşıt konumlarda onları savurgan, açgözlü, vahşi, atılgan, cüretkâr, fikir değiştirmeye yatkın, heyecanlı, kolay kışkırtılan, yalancı, hırsız, dinsiz, yalan yere yemin eden, saldırmaya hazır, fitneci, yangın çıkaran, tiyatroda karışıklık yaratan, küstah, korsan, ev soyan, katil, sahtekâr, alçak, büyücü, sihirbaz, cadı, adam öldüren kimseler yapar.'],
+    'venus+mercury': ['Merkür\'le birleşmiş olarak, onurlu konumlarda Venüs onları sanatçı, filozofça, anlayışla donatılmış, yetenekli, şair, Müzleri seven, güzeli seven, değerli karakterli, zevk peşinde, lüks düşkünü, mutlu, dostlarını seven, dindar, sağgörülü, çaresi tükenmez, entelektüel, zeki, başarılı, çabuk öğrenen, kendi kendini yetiştiren, en iyinin peşinde, güzelliği taklit eden, güzel ve hoş konuşan, sevgi uyandıran, karakteri düzenli, ciddi, idmanı seven, dürüst, muhakemesi iyi, yüce gönüllü yapar; aşk işlerinde kadınlarla ilişkilerinde ölçülü ama oğlanlara karşı daha tutkulu ve kıskanç.',
+      'Ters konumda onları kavgacı, çaresi tükenmez, kötü konuşan, kararsız, niyeti kötü, aldatıcı, kışkırtıcı, yalancı, iftiracı, yalan yere yemin eden, tam düzenbaz, entrikacı, inançsız, güvenilmez, sahtekâr, kadınları ve çocukları baştan çıkaran; ayrıca kendini süsleyen, epey kadınsı, kınamada ve dedikoduda kötü niyetli, geveze, alçak, bazen bu tür işleri baştan çıkarmak amacıyla taklit eden ve bazen gerçekten yapan, alçakça işlere kendini veren ve bunları yapan, ve her türlü alçakça muameleye maruz kalan kimseler yapar.']
+  };
+
+  const MOON = [
+    'Söylenenler doğru olmakla birlikte, Ay\'ın kendi hâli de belli bir katkıda bulunur. Çünkü Ay kuzey ve güney sınırlarının dönemeçlerinde bulunursa, ruhun karakteri bakımından daha fazla çok yönlülük, çaresi tükenmezlik ve değişme yeteneği yönünde yardım eder;',
+    'düğümlerde, daha fazla keskinlik, faaliyet ve heyecanlılık yönünde;',
+    'yine, doğuşta ve ışığının artışlarında, daha büyük doğal yeteneklere, üne, sağlamlığa ve açık sözlülüğe doğru;',
+    've ışığının azalışında ya da örtülmelerinde, daha fazla uyuşukluğa ve donukluğa, daha az amaç kararlılığına, daha fazla temkinliliğe ve daha az üne doğru.'
+  ];
+  const SUN = [
+    'Güneş de, ruhun mizacını yöneten gezegenle yakınlık içinde olduğunda yardım eder; onurlu bir konumda onu adalet, başarı, onur, ağırbaşlılık ve tanrılara saygı yönünde değiştirir,',
+    'ama ters ve yabancı konumda onu daha alçakgönüllü, daha çalışkan, daha az göze çarpan, daha vahşi, daha inatçı, daha sert, hayatı daha zor ve genel olarak daha az başarılı kılar.'
+  ];
+
+  root.AstroPtolemy = { REF, METHOD, SIGN_TYPES, SINGLE, PAIR, MOON, SUN };
+  if (typeof module !== 'undefined') module.exports = root.AstroPtolemy;
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
+<script>/* Ptolemaios'un "ruhun hâkimi" yönteminin hesaplanması (Tetrabiblos III.13). Global: AstroPtolCalc */
+(function (root) {
+  const C = root.AstroCore || require('./core.js');
+  const D = root.AstroData || require('./data.js');
+  const A = root.AstroAnalysis || require('./analysis.js');
+  const { norm, angDiff, lonOf } = C;
+  const CAND = ['saturn', 'jupiter', 'mars', 'venus', 'mercury'];
+  const PT_ASPECTS = [0, 60, 90, 120, 180];
+  const signIdx = l => Math.floor(norm(l) / 30);
+  // Ptolemaios'un "görünüş" anlayışı burçtan burca: aynı burç, 2, 3, 4, 6 burç ara
+  const signConfig = (a, b) => [0, 2, 3, 4, 6].includes(Math.min((signIdx(a) - signIdx(b) + 12) % 12, (signIdx(b) - signIdx(a) + 12) % 12));
+
+  /* Ay'ın son ayrıldığı ve ilk yaklaşacağı gezegen (tam Ptolemaik açıyla) */
+  function moonSepApp(natal) {
+    const t0 = natal.utc.getTime(), H = 3600000;
+    const find = dir => {
+      let best = null;
+      CAND.forEach(id => {
+        PT_ASPECTS.forEach(ang => {
+          const offs = ang === 0 || ang === 180 ? [ang] : [ang, -ang];
+          offs.forEach(o => {
+            const f = t => angDiff(lonOf('moon', new Date(t)), norm(lonOf(id, new Date(t)) + o));
+            let prev = f(t0);
+            for (let k = 1; k <= 72; k++) { // 3 gün
+              const t = t0 + dir * k * H, cur = f(t);
+              if ((prev <= 0) !== (cur <= 0) && Math.abs(prev - cur) < 20) {
+                if (!best || k < best.h) best = { id, ang, h: k, t };
+                break;
+              }
+              prev = cur;
+            }
+          });
+        });
+      });
+      return best;
+    };
+    return { sep: find(-1), app: find(+1) };
+  }
+
+  function dignityPts(id, lon, isDay) {
+    const d = A.dignities(id, lon, isDay);
+    return { pts: (d.dom ? 5 : 0) + (d.exalt ? 4 : 0) + (d.trip ? 3 : 0) + (d.term ? 2 : 0), d };
+  }
+
+  function compute(natal, Z) {
+    const isDay = natal.isDay;
+    const by = Object.fromEntries(natal.planets.map(p => [p.id, p]));
+    const merc = by.mercury, moon = by.moon;
+    const sa = moonSepApp(natal);
+    const rows = CAND.map(id => {
+      const p = by[id];
+      const atMerc = dignityPts(id, merc.lon, isDay), atMoon = dignityPts(id, moon.lon, isDay);
+      const cfgMerc = id === 'mercury' ? true : signConfig(p.lon, merc.lon);
+      const cfgMoon = signConfig(p.lon, moon.lon);
+      const moonLink = (sa.sep && sa.sep.id === id ? 1 : 0) + (sa.app && sa.app.id === id ? 1 : 0);
+      const score = atMerc.pts + atMoon.pts + (cfgMerc ? 3 : 0) + (cfgMoon ? 2 : 0) + moonLink * 3;
+      return { id, atMerc: atMerc.pts, atMoon: atMoon.pts, cfgMerc, cfgMoon, moonSep: !!(sa.sep && sa.sep.id === id), moonApp: !!(sa.app && sa.app.id === id), score };
+    }).sort((a, b) => b.score - a.score);
+    const top = rows[0], second = rows[1];
+    const govs = [top.id];
+    if (second && second.score > 0 && second.score >= 0.75 * top.score) govs.push(second.id);
+    // İtibar (onurlu konum): makam, hayyiz, köşe, yanma
+    const honour = id => {
+      const zp = Z.planets.find(x => x.id === id);
+      const reasons = []; let s = 0;
+      if (zp.dg.dom || zp.dg.exalt || zp.dg.trip) { s += 1; reasons.push('kendi makamında (hâne/şeref/müselles)'); }
+      if (zp.dg.det || zp.dg.fall) { s -= 1; reasons.push('vebâl ya da hubûtta'); }
+      if (zp.inSect) { s += 1; reasons.push('doğumun hayyizine uygun'); } else { s -= 1; reasons.push('hayyize aykırı'); }
+      if ([1, 4, 7, 10].includes(zp.house)) { s += 1; reasons.push(`köşe beytte (${zp.house}.)`); }
+      else if ([3, 6, 9, 12].includes(zp.house)) { s -= 1; reasons.push(`düşen beytte (${zp.house}.)`); }
+      if (zp.combust === 'muhterik') { s -= 1; reasons.push('Güneş altında yanık'); }
+      return { id, score: s, good: s >= 1, reasons };
+    };
+    const hon = govs.map(honour);
+    const pairKey = govs.length === 2 ? (CAND.indexOf(govs[0]) < CAND.indexOf(govs[1]) ? govs[0] + '+' + govs[1] : govs[1] + '+' + govs[0]) : null;
+    // Ay'ın hâli
+    const phase = Ax().MoonPhase(Ax().MakeTime(natal.utc));
+    const moonCond = [];
+    if (Math.abs(moon.lat) >= 4.3) moonCond.push(0); else if (Math.abs(moon.lat) <= 1) moonCond.push(1);
+    moonCond.push(phase < 180 ? 2 : 3);
+    // Güneş'in yönetici(ler)le yakınlığı (burçtan burca görünüş)
+    const sunFam = govs.some(id => signConfig(by[id].lon, by.sun.lon));
+    return { rows, govs, pairKey, hon, sa, mercSign: signIdx(merc.lon), moonSign: signIdx(moon.lon), moonCond, moonLat: moon.lat, phase, sunFam };
+  }
+  function Ax() { return root.Astronomy || require('astronomy-engine'); }
+
+  root.AstroPtolCalc = { compute, moonSepApp };
+  if (typeof module !== 'undefined') module.exports = root.AstroPtolCalc;
+})(typeof window !== 'undefined' ? window : globalThis);
+</script>
 <script>/* İkincil progresyon, güneş yayı yönlendirmesi, Ay dönüşü. Global: AstroProg */
 (function (root) {
   const Ax = root.Astronomy || require('astronomy-engine');
@@ -2123,7 +2287,13 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     const o = W.opts;
     const cb = id => { const a = D.ASPECTS.find(x => x.id === id); return `<label class="cb"><input type="checkbox" data-asp="${id}" ${o.types.includes(id) ? 'checked' : ''}> <span style="color:${a.color}">${a.g}</span> ${a.tr.replace(/ \(.*\)/, '')} <small class="muted">${a.angle}°</small></label>`; };
     const maj = W.aspTexts.filter(t => t.major), min = W.aspTexts.filter(t => !t.major);
-    const item = t => `<div class="item avoid"><h3><span style="color:${D.ASPECTS.find(x => x.id === t.type).color}">${esc(t.title)}</span></h3><p>${esc(t.body)}</p></div>`;
+    const PT = window.AstroPtolemy, CAND = ['saturn', 'jupiter', 'mars', 'venus', 'mercury'];
+    const classic = t => {
+      if (!PT || !CAND.includes(t.a) || !CAND.includes(t.b)) return '';
+      const k = CAND.indexOf(t.a) < CAND.indexOf(t.b) ? t.a + '+' + t.b : t.b + '+' + t.a; const tx = PT.PAIR[k]; if (!tx) return '';
+      return `<details class="small"><summary>Klasik kaynak: Ptolemaios bu iki gezegenin birleşimi hakkında ne der?</summary><p class="muted">Not: Ptolemaios bu metni açı türüne göre değil, iki gezegen birlikte "ruhun yöneticisi" olduğunda verir; "itibarlı" ve "karşıt" ayrımı gezegenlerin konumuna göredir. Bu haritada ruhun yöneticisinin kim olduğu Zâyiçe sekmesinde hesaplanır. Kaynak: ${esc(PT.REF)}.</p><p><b>İtibarlı konumda:</b> ${esc(tx[0])}</p><p><b>Karşıt konumda:</b> ${esc(tx[1])}</p></details>`;
+    };
+    const item = t => `<div class="item avoid"><h3><span style="color:${D.ASPECTS.find(x => x.id === t.type).color}">${esc(t.title)}</span></h3><p>${esc(t.body)}</p>${classic(t)}</div>`;
     const fam = k => D.ASPECT_FAMILY[k] || '';
     return `<section class="card avoid"><h2>Açı Ayarları</h2>
         <div class="aspctl">
@@ -2282,6 +2452,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
         <div><table class="t"><thead><tr><th>Seyyâre</th><th>Burç</th><th>Beyt</th><th>Makam</th><th>Puan</th><th>Hâl</th></tr></thead><tbody>${rows}</tbody></table>
         <p class="muted small">Makam puanı (klasik usul): Hâne +5, Şeref +4, Müselles +3, Hadd +2, Vech +1, Vebâl −5, Hubût −4.</p></div></div>
       </section>
+      ${(() => { try { return ptolemySection(ch, Z); } catch (e) { console.error(e); return ''; } })()}
       <section class="card avoid"><h2>Hayyiz: Gündüz mü Gece mi?</h2>
         <p>Doğum <b>${Z.isDay ? 'nehârî (gündüz)' : 'leylî (gece)'}</b>. Klasik gelenekte gezegenler gündüz ve gece "takımlarına" ayrılır. Bu haritada en faydalı sayılan gezegen <b>${D.PLANETS[Z.sectBenefic].ot}</b> (${D.PLANETS[Z.sectBenefic].tr}), en zorlayıcı sayılan gezegen <b>${D.PLANETS[Z.contraryMalefic].ot}</b> (${D.PLANETS[Z.contraryMalefic].tr}) olur. Takımına uygun düşen uğursuz gezegen ${D.PLANETS[Z.sectMalefic].ot} ise daha ölçülü tesir eder.</p>
       </section>
@@ -2310,6 +2481,48 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
         <table class="t"><thead><tr><th>Dönem sahibi</th><th>Süre</th><th>Tarihler</th><th></th></tr></thead><tbody>${fard}</tbody></table>
         ${Z.curF ? `<p>Şu an <b>${D.PLANETS[Z.curF.id].ot}</b> fardârındasın${Z.curSub ? `, alt dönem <b>${D.PLANETS[Z.curSub.id].ot}</b>` : ''}. Klasik okumada bu dönemde ${D.PLANETS[Z.curF.id].short} konuları öne çıkar${Z.curSub && Z.curSub.id !== Z.curF.id ? `; alt dönem ${D.PLANETS[Z.curSub.id].short} temasını ekler` : ''}.</p>` : ''}
       </section>`;
+  }
+
+  /* ---------- Ptolemaios: Ruhun Niteliği ---------- */
+  function ptolemySection(ch, Z) {
+    const PT = window.AstroPtolemy, R = window.AstroPtolCalc.compute(ch, Z);
+    const nm = id => `${D.PLANETS[id].ot} (${D.PLANETS[id].tr})`;
+    const nGood = R.hon.filter(h => h.good).length, mixed = nGood > 0 && nGood < R.hon.length, good = nGood === R.hon.length;
+    const block = (txt, active, label) => `<div class="ptq ${active || mixed ? 'on' : 'off'}"><div class="ptl">${label}${mixed ? ' — <b>kısmen uyuyor</b> (yöneticilerden biri onurlu, diğeri değil; Ptolemaios bu durumda etkilerin karışarak birlikte çalıştığını söyler)' : active ? ' — <b>bu haritaya uyan</b>' : ''}</div>${esc(txt)}</div>`;
+    let main = '';
+    if (R.pairKey && PT.PAIR[R.pairKey]) {
+      const [g, b] = PT.PAIR[R.pairKey];
+      main = block(g, good, 'İtibarlı (onurlu) konumda') + block(b, !good, 'Karşıt (itibarsız) konumda');
+    } else {
+      const [g, b] = PT.SINGLE[R.govs[0]];
+      main = block(g, good, 'İtibarlı (onurlu) konumda') + block(b, !good, 'Karşıt (itibarsız) konumda');
+    }
+    const ST = { oncu: 'oncu', sabit: 'sabit', degisken: 'degisken' };
+    const mSt = D.SIGNS[R.mercSign].mod, lSt = D.SIGNS[R.moonSign].mod;
+    const rowsT = R.rows.map(r => `<tr class="${R.govs.includes(r.id) ? 'cur' : ''}"><td>${G(r.id)} ${nm(r.id)}</td><td class="num">${r.atMerc}</td><td class="num">${r.atMoon}</td><td>${r.cfgMerc ? '✓' : ''}</td><td>${r.cfgMoon ? '✓' : ''}</td><td>${r.moonSep ? 'ayrılış' : ''}${r.moonSep && r.moonApp ? ', ' : ''}${r.moonApp ? 'yaklaşma' : ''}</td><td class="num"><b>${r.score}</b></td></tr>`).join('');
+    const ang = a => ({ 0: 'kavuşum', 60: 'altmışlık', 90: 'kare', 120: 'üçgen', 180: 'karşıt' }[a]);
+    return `<section class="card"><h2>Ruhun Niteliği — Ptolemaios'a Göre</h2>
+      <p class="muted small">Kaynak: ${esc(PT.REF)}. Robbins'in İngilizce çevirisinden Türkçeye tam çeviridir; ifadeler kaynakta olduğu gibidir, yumuşatılmamıştır.</p>
+      <p>Ptolemaios ruhun niteliğini her gezegenden ayrı ayrı okumaz: Akıl ve zihin <b>Merkür</b>'den, duyusal ve akıl dışı yan <b>Ay</b>'dan ve Ay'ın ayrıldığı ve yaklaştığı gezegenlerden okunur. Bu ikisine <b>hâkim olan</b> gezegen (ya da gezegenler) "ruhun yöneticisi" olur ve karakteri o belirler.</p>
+      <h3>Bu haritada ruhun yöneticisi: ${R.govs.map(nm).join(' ve ')}</h3>
+      ${main}
+      <div class="ptwhy"><b>Neden bu gezegen?</b> Doğum anında Ay ${R.sa.sep ? `${R.sa.sep.h} saat önce ${nm(R.sa.sep.id)} ile ${ang(R.sa.sep.ang)} görünüşünden ayrılmıştı` : 'yakın zamanda bir gezegenden ayrılmamıştı'} ve ${R.sa.app ? `${R.sa.app.h} saat sonra ${nm(R.sa.app.id)} ile ${ang(R.sa.app.ang)} görünüşüne yaklaşacaktı` : 'yakın zamanda bir gezegene yaklaşmıyordu'}. Merkür ${D.SIGNS[R.mercSign].ot} (${D.SIGNS[R.mercSign].tr}), Ay ${D.SIGNS[R.moonSign].ot} (${D.SIGNS[R.moonSign].tr}) burcunda.
+        <table class="t" style="margin-top:6px"><thead><tr><th>Aday</th><th>Merkür'ün yerinde makam</th><th>Ay'ın yerinde makam</th><th>Merkür'le görünüş</th><th>Ay'la görünüş</th><th>Ay'ın ayrılış/yaklaşması</th><th>Toplam</th></tr></thead><tbody>${rowsT}</tbody></table>
+        <p class="muted small">Ptolemaios hâkimiyetin hangi ölçütlerle tartılacağını sayar (makam sahipliği, Merkür'le görünüş, Ay'ın ayrılış ve yaklaşmasını tutmak) ama sayısal bir puanlama vermez. Buradaki puanlar uygulamanın tartımıdır: makam (hâne 5, şeref 4, müselles 3, hadd 2), Merkür'le görünüş 3, Ay'la görünüş 2, Ay'ın ayrılışı/yaklaşması 3'er. Görünüşler Ptolemaios'taki gibi burçtan burca sayılmıştır. İkinci aday birincinin en az dörtte üçü kadar puan aldıysa ikisi birlikte "birleşmiş" sayılır.</p>
+        <p class="muted small"><b>Onurlu mu?</b> ${R.hon.map(h => `${nm(h.id)}: ${h.reasons.join(', ')} → ${h.good ? 'onurlu (itibarlı)' : 'onursuz (itibarsız)'}`).join('; ')}. (Ptolemaios "evrene ve köşelere göre itibarlı konum" der; burada makam, hayyiz, köşe beyt ve yanma birlikte tartılmıştır.)</p>
+      </div>
+      <h3>Burçların katkısı</h3>
+      <p><b>Merkür'ün burcu (${D.SIGNS[R.mercSign].tr}, ${D.MODES[mSt].tr.toLocaleLowerCase('tr')}):</b> ${esc(PT.SIGN_TYPES[ST[mSt]])}</p>
+      ${lSt !== mSt ? `<p><b>Ay'ın burcu (${D.SIGNS[R.moonSign].tr}, ${D.MODES[lSt].tr.toLocaleLowerCase('tr')}):</b> ${esc(PT.SIGN_TYPES[ST[lSt]])}</p>` : `<p class="muted small">Ay da aynı türden bir burçta (${D.SIGNS[R.moonSign].tr}).</p>`}
+      <h3>Ay'ın ve Güneş'in katkısı</h3>
+      <p>Ptolemaios'a göre Ay'ın kendi hâli de karaktere katkıda bulunur. Bu haritada: ${R.moonCond.map(i => `<b>${esc(i === 0 ? 'kuzey ya da güney sınırının dönemecinde: daha fazla çok yönlülük, çaresi tükenmezlik ve değişme yeteneği' : i === 1 ? 'düğümlerde: daha fazla keskinlik, faaliyet ve heyecanlılık' : i === 2 ? 'ışığı artarken: daha büyük doğal yetenekler, ün, sağlamlık ve açık sözlülük' : 'ışığı azalırken: daha fazla uyuşukluk ve donukluk, daha az amaç kararlılığı, daha fazla temkin, daha az ün')}</b>`).join('; ')}. <span class="muted small">(Bu haritada Ay'ın enlemi ${R.moonLat.toFixed(1)}°, ${R.phase < 180 ? 'ışığı artıyor' : 'ışığı azalıyor'}.)</span></p>
+      <p>${R.sunFam ? `Güneş ruhun yöneticisiyle görünüş içinde. Ptolemaios'a göre ${mixed ? 'yönetici onurlu konumdaysa' : ''} ${esc((good || mixed ? PT.SUN[0] : PT.SUN[1]).replace(/^ama /, '').replace(/,$/, '.'))}${mixed ? ' Yönetici ters konumdaysa ise ' + esc(PT.SUN[1].replace(/^ama /, '')) : ''}` : 'Güneş ruhun yöneticisiyle görünüş içinde değil; Ptolemaios\'un Güneş paragrafı bu haritaya uygulanmaz.'}</p>
+      <details style="margin-top:10px"><summary>Ptolemaios'un yöntem bölümünün tam çevirisi</summary>${PT.METHOD.map(p => `<p>${esc(p)}</p>`).join('')}<p>${esc(PT.MOON.join(' '))}</p><p>${esc(PT.SUN.join(' '))}</p></details>
+      <details><summary>Bölümdeki bütün tekil ve çift yorumlar (15 metin)</summary>
+        ${Object.entries(PT.SINGLE).map(([k, [g, b]]) => `<div class="item"><h3>${nm(k)} tek başına</h3><p><b>İtibarlı:</b> ${esc(g)}</p><p><b>Karşıt:</b> ${esc(b)}</p></div>`).join('')}
+        ${Object.entries(PT.PAIR).map(([k, [g, b]]) => `<div class="item"><h3>${k.split('+').map(nm).join(' + ')}</h3><p><b>İtibarlı:</b> ${esc(g)}</p><p><b>Karşıt:</b> ${esc(b)}</p></div>`).join('')}
+      </details>
+    </section>`;
   }
 
   /* ---------- Karşılaştırma ---------- */
