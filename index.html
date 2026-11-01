@@ -144,6 +144,9 @@ details.leo.cur summary{background:#fbf3dc}
 .askbtns{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
 .askbtns button{padding:9px 18px}
 @media print{#p-soru{display:none!important}}
+.linkbtn{background:none;border:0;padding:0;color:var(--accent);text-decoration:underline;cursor:pointer;font:inherit}
+.booklinks{margin:6px 0 6px 18px;padding:0}.booklinks li{margin:4px 0}
+@media print{#bookCard{display:none!important}}
 </style>
 </head>
 <body>
@@ -208,7 +211,7 @@ details.leo.cur summary{background:#fbf3dc}
     <div class="panel" id="p-soru"></div>
   </div>
 </main>
-<footer>Gezegen konumları astronomy-engine (MIT lisansı) ile hesaplanır; Swiss Ephemeris ile karşılaştırılarak doğrulanmıştır. Sürüm 8 · İnternetsiz çalışır.</footer>
+<footer>Gezegen konumları astronomy-engine (MIT lisansı) ile hesaplanır; Swiss Ephemeris ile karşılaştırılarak doğrulanmıştır. Sürüm 9 · İnternetsiz çalışır.</footer>
 <div id="updBar" class="upd" hidden>Yeni sürüm hazır. <button type="button" class="btn" id="updBtn">Yenile</button></div>
 <script>/*
  MIT
@@ -1580,7 +1583,8 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       ${ph ? `<section class="card avoid"><h2>Bugünün Gezegen Saatleri</h2>
         <p class="muted small">Klasik usulde gündüz (güneş doğuşundan batışına) ve gece on ikişer eşit "saate" bölünür; her saatin sahibi Keldânî sırasıyla değişir. Osmanlı saatnâmelerindeki ve "eşref saat" anlayışındaki hesap budur. Güneş doğuşu ${fT(ph.rise)}, batışı ${fT(ph.set)}.</p>
         <div class="hours">${ph.hours.map(h => `<div class="hr${h.now ? ' now' : ''}${h.night ? ' nt' : ''}"><small>${h.night ? 'Gece ' + (h.no - 12) : 'Gündüz ' + h.no}</small><b>${G(h.ruler)} ${D.PLANETS[h.ruler].ot}</b><small>${fT(h.start)}–${fT(h.end)}</small></div>`).join('')}</div>
-      </section>` : ''}`;
+      </section>` : ''}
+      ${window.AstroBook ? window.AstroBook.section(ph) : ''}`;
   }
   function moonSvg(phase) {
     // phase: 0 yeni, 180 dolunay
@@ -2640,6 +2644,85 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     refresh();
   }
   root.AstroAsk = { render, build };
+})(window);
+</script>
+<script>/* "Saatlerin Hazinesi" için kişisel kitap bağlantısı. Global: AstroBook
+   Kitabın metni uygulamada YOKTUR (1973 Selahaddin Alpay çevirisi telifli). Kullanıcı kendi PDF'ini bir kez seçer;
+   dosya yalnızca bu tarayıcının yerel deposunda (IndexedDB) kalır, hiçbir yere gönderilmez. Uygulama sadece ilgili sayfayı açar.
+   Sayfa numaraları PDF'in kendi sırasıdır (taranmış 279 sayfalık baskı, Ağustos 2005 PDF'i). */
+(function (root) {
+  const D = root.AstroData;
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  // gün: [bölüm başı, saatlerin listesi, hastalığın başladığı saat]
+  const DAYS = {
+    'Pazar': { sec: 11, hours: 37, ill: 27 }, 'Pazartesi': { sec: 95, hours: 118, ill: 119 }, 'Salı': { sec: 173, hours: 191, ill: 192 },
+    'Çarşamba': { sec: 65, hours: 90, ill: 91 }, 'Perşembe': { sec: 149, hours: 169, ill: 170 }, 'Cuma': { sec: 40, hours: 61, ill: 62 }, 'Cumartesi': { sec: 123, hours: 145, ill: 146 }
+  };
+  const OTHER = [['Kevkeplerin birleşmesi (mukârenet) ve felekler', 195], ['Ay\'ın doğuş ve batış saatleri, burçların doğuşu', 219], ['Ebced ve çeşitli bilgiler', 225],
+    ['Haftanın günlerinin bilinmesi', 237], ['Ay tutulmaları', 251], ['Senenin başlangıç gününe göre', 258], ['Ay menzilleri', 270], ['Yedi kevkebin buhurları', 277]];
+  const DB = 'zayice_kitap', ST = 'pdf', KEY = 'saatlerin-hazinesi';
+  let blobUrl = null, has = null;
+
+  function idb() {
+    return new Promise((res, rej) => { const r = indexedDB.open(DB, 1); r.onupgradeneeded = () => r.result.createObjectStore(ST); r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
+  }
+  async function get() { const db = await idb(); return new Promise((res, rej) => { const q = db.transaction(ST).objectStore(ST).get(KEY); q.onsuccess = () => res(q.result || null); q.onerror = () => rej(q.error); }); }
+  async function put(blob) { const db = await idb(); return new Promise((res, rej) => { const t = db.transaction(ST, 'readwrite'); t.objectStore(ST).put(blob, KEY); t.oncomplete = res; t.onerror = () => rej(t.error); }); }
+  async function del() { const db = await idb(); return new Promise((res, rej) => { const t = db.transaction(ST, 'readwrite'); t.objectStore(ST).delete(KEY); t.oncomplete = res; t.onerror = () => rej(t.error); }); }
+
+  async function open(page) {
+    try {
+      if (!blobUrl) { const b = await get(); if (!b) { status('Önce kitabın PDF dosyasını seç.'); return; } blobUrl = URL.createObjectURL(b); }
+      window.__lastBook = blobUrl + '#page=' + page; const w = window.open(window.__lastBook, '_blank');
+      if (!w) status('Tarayıcı yeni sekmeyi engelledi; açılır pencerelere izin ver.');
+    } catch (e) { status('Kitap açılamadı: ' + e.message); }
+  }
+  function status(t) { const el = document.querySelector('#bookMsg'); if (el) el.textContent = t; }
+  async function refreshState() {
+    try { has = !!(await get()); } catch (e) { has = false; }
+    document.querySelectorAll('.bookOn').forEach(e => e.hidden = !has);
+    document.querySelectorAll('.bookOff').forEach(e => e.hidden = has);
+  }
+
+  function link(p, label) { return `<button type="button" class="linkbtn" data-bookpage="${p}">${esc(label)}</button> <span class="muted small">(PDF s. ${p})</span>`; }
+
+  function section(ph) {
+    if (!ph || !root.indexedDB) return '';
+    const d = DAYS[ph.weekday]; if (!d) return '';
+    const cur = ph.hours.find(h => h.now);
+    const ot = D.PLANETS[ph.dayRuler].ot;
+    setTimeout(refreshState, 0);
+    return `<section class="card avoid" id="bookCard"><h2>Saatlerin Hazinesi (kendi kitabın)</h2>
+      <p class="muted small">İbn Arabi'ye atfedilen <i>Saatlerin Hazinesi</i> (Selahaddin Alpay çevirisi, 1973). Çeviri telifli olduğu için kitabın metni uygulamada yok; uygulama yalnızca bugün ve şu anki saat için kendi PDF'inde hangi sayfaya bakacağını gösterir ve o sayfayı açar. Kitaptaki saat düzeni yukarıdaki gezegen saatleriyle aynıdır: gündüz on iki saate bölünür, ilk saat günün sahibine aittir, sonrakiler Keldânî sırasıyla gelir (örneğin Pazar: 1. Güneş, 2. Zühre, 3. Utarid, 4. Ay, 5. Zühal, 6. Müşteri, 7. Merih). Kitapta gündüzün on iki saati tek tek anlatılıyor; gece saatleri için ayrı bir liste yok.</p>
+      <div class="bookOff" hidden><p>Kitabın PDF'ini bir kez seç; dosya yalnızca bu tarayıcıda saklanır, internete gönderilmez. Telefonda kullanacaksan PDF'i telefona da kopyalayıp orada bir kez seçmen gerekir.</p>
+        <label class="btn" style="display:inline-block">PDF'i seç<input type="file" accept="application/pdf,.pdf" id="bookFile" hidden></label></div>
+      <div class="bookOn" hidden>
+        <p>Bugün <b>${esc(ph.weekday)}</b>, ${esc(ot)} günü${cur ? `; şu an ${cur.night ? 'gecenin ' + (cur.no - 12) : 'gündüzün ' + cur.no}. saati (${esc(D.PLANETS[cur.ruler].ot)} saati)` : ''}.</p>
+        <ul class="booklinks">
+          <li>${link(d.sec, `${ph.weekday} günü ve ${ot} kevkebi bölümünün başı`)}</li>
+          <li>${link(d.hours, `${ph.weekday} gününün on iki saati${cur && !cur.night ? ` (sen ${cur.no}. saattesin)` : ''}`)}</li>
+          <li>${link(d.ill, `${ph.weekday} günü saatlerine göre hastalığın seyri`)}</li>
+        </ul>
+        <details><summary>Kitabın diğer bölümleri</summary><ul class="booklinks">${OTHER.map(([t, p]) => `<li>${link(p, t)}</li>`).join('')}</ul>
+          <p class="muted small">Haftanın her günü için: ${Object.entries(DAYS).map(([g, x]) => `<button type="button" class="linkbtn" data-bookpage="${x.hours}">${g}</button>`).join(' · ')}</p></details>
+        <p class="muted small">Telefonlarda bazı PDF görüntüleyiciler doğrudan sayfaya atlamaz; o durumda yukarıdaki PDF sayfa numarasına elle git. <button type="button" class="linkbtn" id="bookForget">Kitabı bu cihazdan kaldır</button></p>
+      </div>
+      <p id="bookMsg" class="small"></p>
+    </section>`;
+  }
+
+  document.addEventListener('click', e => {
+    const b = e.target.closest('[data-bookpage]'); if (b) { e.preventDefault(); open(+b.dataset.bookpage); }
+    if (e.target.id === 'bookForget') { del().then(() => { if (blobUrl) URL.revokeObjectURL(blobUrl); blobUrl = null; status('Kitap bu cihazdan kaldırıldı.'); refreshState(); }); }
+  });
+  document.addEventListener('change', async e => {
+    if (e.target.id !== 'bookFile') return;
+    const f = e.target.files && e.target.files[0]; if (!f) return;
+    if (!/pdf$/i.test(f.type) && !/\.pdf$/i.test(f.name)) { status('Bu bir PDF dosyası değil.'); return; }
+    try { await put(f); if (blobUrl) URL.revokeObjectURL(blobUrl); blobUrl = null; status(`Kaydedildi: ${f.name}`); refreshState(); }
+    catch (err) { status('Kaydedilemedi: ' + err.message); }
+  });
+  root.AstroBook = { section, DAYS };
 })(window);
 </script>
 <script>/* Arayüz */
