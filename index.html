@@ -137,6 +137,13 @@ footer{text-align:center;font-size:12.5px;color:var(--muted);padding:10px}
 details.leo{border-top:1px solid #e6dfcf;padding:6px 0}
 details.leo summary{cursor:pointer}
 details.leo.cur summary{background:#fbf3dc}
+#p-soru textarea{width:100%;box-sizing:border-box;font:inherit;padding:8px;border:1px solid #cdbf9f;border-radius:6px;background:#fffdf7}
+#askOut{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}
+.askopts{display:flex;flex-wrap:wrap;gap:6px 18px;margin:10px 0}
+.askopts label{white-space:nowrap}
+.askbtns{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
+.askbtns button{padding:9px 18px}
+@media print{#p-soru{display:none!important}}
 </style>
 </head>
 <body>
@@ -188,6 +195,7 @@ details.leo.cur summary{background:#fbf3dc}
       <button class="tab" data-tab="yil">Yıllık Dönem</button>
       <button class="tab" data-tab="ilerletim">İlerletim</button>
       <button class="tab" data-tab="karsilastirma">Karşılaştırma</button>
+      <button class="tab" data-tab="soru">Soru Sor</button>
     </nav>
     <div class="panel on" id="p-ozet"></div>
     <div class="panel" id="p-bati"></div>
@@ -197,9 +205,10 @@ details.leo.cur summary{background:#fbf3dc}
     <div class="panel" id="p-yil"></div>
     <div class="panel" id="p-ilerletim"></div>
     <div class="panel" id="p-karsilastirma"></div>
+    <div class="panel" id="p-soru"></div>
   </div>
 </main>
-<footer>Gezegen konumları astronomy-engine (MIT lisansı) ile hesaplanır; Swiss Ephemeris ile karşılaştırılarak doğrulanmıştır. Sürüm 7 · İnternetsiz çalışır.</footer>
+<footer>Gezegen konumları astronomy-engine (MIT lisansı) ile hesaplanır; Swiss Ephemeris ile karşılaştırılarak doğrulanmıştır. Sürüm 8 · İnternetsiz çalışır.</footer>
 <div id="updBar" class="upd" hidden>Yeni sürüm hazır. <button type="button" class="btn" id="updBtn">Yenile</button></div>
 <script>/*
  MIT
@@ -2463,6 +2472,176 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
   window.AstroProgUI = { render };
 })();
 </script>
+<script>/* "Soru Sor" sekmesi: hesaplanan verileri yapay zekâya yapıştırılacak düz metne çevirir. Global: AstroAsk
+   İnternete hiçbir şey göndermez; yalnızca panoya kopyalar ya da telefonun paylaş menüsünü açar. */
+(function (root) {
+  const C = root.AstroCore, D = root.AstroData, A = root.AstroAnalysis, S = root.AstroSky, P = root.AstroProg, L = root.AstroLeo, PT = root.AstroPtolemy;
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const DAY = 86400000, YEAR = 365.2422 * DAY;
+  const PN = id => id === 'asc' ? 'Yükselen' : id === 'mc' ? 'MC (Tepe noktası)' : D.PLANETS[id] ? D.PLANETS[id].tr : id;
+  const ASP = { par: 'paralel', conj: 'kavuşum', semisext: 'yarım altmışlık', semisq: 'yarım kare', sext: 'altmışlık', square: 'kare', trine: 'üçgen', sesqui: 'bir buçuk kare', quincunx: 'yüz ellilik', opp: 'karşıt' };
+  const aspName = id => ASP[id] || (D.ASPECTS.find(a => a.id === id) || { tr: id }).tr.replace(/ \(.*\)/, '').toLocaleLowerCase('tr');
+  const DG = { dom: 'kendi burcunda (beyt)', exalt: 'şerefinde', trip: 'müsellesinde', term: 'kendi haddinde', face: 'kendi vechinde', det: 'vebalinde (zarar)', fall: 'hubûtunda (düşüş)', peregrine: 'garîb (itibarsız)' };
+  const LOTN = { fortune: 'Sehm-i Saâdet (Şans)', spirit: 'Sehm-i Gayb (Ruh)', eros: 'Aşk', necessity: 'Zaruret', courage: 'Cesaret', victory: 'Zafer', nemesis: 'Nemesis (düşman/sıkıntı)', death: 'Ölüm' };
+  const HS = { placidus: 'Placidus', porphyry: 'Porphyry', equal: 'Eşit ev', whole: 'Tam burç' };
+  let TZ = 'Europe/Istanbul', DATA = null;
+  const fD = ms => new Date(ms).toLocaleDateString('tr-TR', { timeZone: TZ, day: 'numeric', month: 'long', year: 'numeric' });
+  const deg = lon => A.fmtDeg(lon);
+  const hOf = (lon, ch) => C.houseOf(lon, ch.cusps);
+
+  function natalBlock(ch, W) {
+    const out = ['## DOĞUM HARİTASI', `Zodyak: tropikal. Ev sistemi: ${HS[ch.houseSystem] || ch.houseSystem}. Harita ${ch.isDay ? 'gündüz' : 'gece'} haritası.`,
+      `Yükselen: ${deg(ch.asc)} · MC: ${deg(ch.mc)}`, '', 'Gezegenler (konum, ev, R = geri hareket):'];
+    ch.planets.forEach(p => { if (D.PLANETS[p.id]) out.push(`- ${PN(p.id)}: ${deg(p.lon)}, ${p.house}. ev${p.retro ? ', R' : ''}`); });
+    out.push('', 'Ev başları: ' + ch.cusps.map((c, i) => `${i + 1}. ${deg(c)}`).join(' · '));
+    out.push('', `Açılar (en fazla ${W.opts.maxOrb}° tolerans; "yaklaşan" henüz tamlaşmamış, "ayrılan" geçmiş demek):`);
+    W.aspects.forEach(a => out.push(`- ${PN(a.a)} ${aspName(a.type)} ${PN(a.b)} (tolerans ${a.orb.toFixed(1)}°${a.applying === true ? ', yaklaşan' : a.applying === false ? ', ayrılan' : ''}${a.major ? '' : ', minör'})`));
+    if (W.starHits && W.starHits.length) {
+      out.push('', 'Sabit yıldız kavuşumları:');
+      W.starHits.forEach(h => out.push(`- ${PN(h.p)} ile ${h.star.name || h.star[0]} (tolerans ${h.orb.toFixed(1)}°)`));
+    }
+    return out.join('\n');
+  }
+
+  function classicalBlock(ch, Z) {
+    const out = ['## KLASİK (ZÂYİÇE) BİLGİLERİ', `Sâhib-i tâli' (yükselenin efendisi): ${PN(Z.lord)}. Haritanın mezhebi (sect): ${Z.isDay ? 'gündüz' : 'gece'}.`, '', 'Gezegenlerin itibarı (dignity):'];
+    Z.planets.forEach(p => {
+      const st = p.states.map(k => DG[k]).filter(Boolean);
+      out.push(`- ${PN(p.id)}: ${st.length ? st.join(', ') : 'özel bir itibarı yok'}; puan ${p.dg.score}${p.combust ? '; Güneş ile: ' + p.combust : ''}${p.retro ? '; geri harekette' : ''}`);
+    });
+    out.push('', 'Hermetik noktalar (sehimler):');
+    Object.entries(Z.lots).forEach(([k, v]) => out.push(`- ${LOTN[k] || k}: ${deg(v)}, ${hOf(v, ch)}. ev`));
+    if (Z.curF) out.push('', `Fardar (fîrdâr) dönemi: ana yönetici ${PN(Z.curF.id)} (${fD(Z.curF.start)} – ${fD(Z.curF.end)})${Z.curSub ? `, alt yönetici ${PN(Z.curSub.id)} (${fD(Z.curSub.start)} – ${fD(Z.curSub.end)})` : ''}.`);
+    return out.join('\n');
+  }
+
+  function transitBlock(ch, nowMs, months) {
+    const out = ['## TRANSİTLER (GÖKYÜZÜNDEKİ GEZEGENLERİN DOĞUM HARİTASINA ETKİSİ)', `Bugün ${fD(nowMs)} itibarıyla gökyüzündeki konumlar (yanında doğum haritasında düştükleri ev):`];
+    ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto', 'node'].forEach(id => {
+      const d = new Date(nowMs), lon = C.lonOf(id, d), r = id !== 'node' && C.speedOf(id, d) < 0;
+      out.push(`- ${PN(id)}: ${deg(lon)}, doğum haritasının ${hOf(lon, ch)}. evinde${r ? ', R' : ''}`);
+    });
+    const tr = S.transits(ch, nowMs, 60, Math.round(months * 30.5)).filter(e => e.end >= nowMs - 30 * DAY);
+    const act = tr.filter(e => e.active).sort((a, b) => b.weight - a.weight), next = tr.filter(e => !e.active && e.start > nowMs);
+    const line = e => `- Transit ${PN(e.t)} ${aspName(e.type)} doğum ${PN(e.n)}: etki penceresi ${fD(e.start)}${e.openStart ? ' (daha önce başladı)' : ''} – ${fD(e.end)}${e.openEnd ? ' (sonra da sürüyor)' : ''}${e.exacts.length ? '; tam isabet: ' + e.exacts.map(fD).join(', ') : ''}${e.active ? `; şu anki tolerans ${e.nowOrb.toFixed(1)}°` : ''}`;
+    out.push('', 'Şu an etkili transitler (Mars, Jüpiter, Satürn, Uranüs, Neptün, Plüton; majör açılar):');
+    out.push(act.length ? act.map(line).join('\n') : '- yok');
+    out.push('', `Önümüzdeki ${months} ay içinde başlayacak transitler:`);
+    out.push(next.length ? next.map(line).join('\n') : '- yok');
+    return out.join('\n');
+  }
+
+  function progBlock(ch, nowMs, withTexts) {
+    const pc = P.progressedChart(ch, nowMs), out = ['## İKİNCİL İLERLETİM (PROGRESYON) VE GÜNEŞ YAYI', 'İlerletilmiş konumlar (doğum haritasındaki evleriyle):'];
+    pc.planets.forEach(p => out.push(`- İlerletilmiş ${PN(p.id)}: ${deg(p.lon)}, doğum haritasının ${p.natalHouse}. evinde${p.retro ? ', R' : ''}`));
+    out.push(`- İlerletilmiş Yükselen: ${deg(pc.asc)} · İlerletilmiş MC: ${deg(pc.mc)}`);
+    out.push(`İlerletilmiş Ay evresi: ${P.PHASES[pc.phase][0]} (Güneş–Ay arası ${pc.phaseAng.toFixed(0)}°).`);
+    const hits = P.hits(ch, nowMs - YEAR, nowMs + 2 * YEAR, 'prog').concat(P.hits(ch, nowMs - YEAR, nowMs + 2 * YEAR, 'arc')).sort((a, b) => a.t - b.t);
+    out.push('', 'İlerletim ve güneş yayı açıları, geçen yıldan önümüzdeki iki yıla (tam isabet tarihleriyle; majör açılar):');
+    out.push(hits.length ? hits.map(h => `- ${fD(h.t)}: ${h.kind === 'arc' ? 'güneş yayıyla yönlendirilmiş' : 'ilerletilmiş'} ${PN(h.m)} ${aspName(h.type)} doğum ${PN(h.n)}`).join('\n') : '- yok');
+    if (L) {
+      const born = ch.utc.getTime();
+      const sun = P.hits(ch, nowMs - 1.5 * YEAR, nowMs + 1.5 * YEAR, 'prog', { sunMinors: true, movers: ['sun'] }).filter(h => L.solarFor(h.n, h.type));
+      const moonFor = (t, a) => (L.LUNAR || []).find(e => e.t === t && e.a.includes(a));
+      const moon = P.hits(ch, nowMs - 60 * DAY, nowMs + 120 * DAY, 'prog', { minorsFor: ['moon'], movers: ['moon'] }).filter(h => moonFor(h.n, h.type));
+      const mh = (L.LUNAR_HOUSES || []).find(x => x.n === pc.planets[1].natalHouse);
+      out.push('', 'Alan Leo\'nun (The Progressed Horoscope, 1906) yorumladığı açılar. Leo\'ya göre Güneş açısı en az üç yıl, Ay açısı bir iki ay işler; Ay açıları ancak Güneş açılarıyla örtüşünce önem kazanır:');
+      sun.forEach(h => {
+        const e = L.solarFor(h.n, h.type);
+        out.push(`- İlerletilmiş Güneş ${aspName(h.type)} doğum ${PN(h.n)}, tam: ${fD(h.t)} (${((h.t - born) / YEAR).toFixed(1)} yaş)` + (withTexts ? `\n  Leo (s. ${e.p})${e.t === 'neptune' ? ', bir abonenin kaleminden' : ''}: "${e.tr}"` : ''));
+      });
+      moon.forEach(h => {
+        const e = moonFor(h.n, h.type);
+        out.push(`- İlerletilmiş Ay ${aspName(h.type)} doğum ${PN(h.n)}, tam: ${fD(h.t)}` + (withTexts ? `\n  Leo (s. ${e.p}): "${e.tr}"` : ''));
+      });
+      if (!sun.length && !moon.length) out.push('- Bu aralıkta Leo\'nun yorumladığı bir açı yok.');
+      if (mh) out.push(`- İlerletilmiş Ay doğum haritasının ${mh.n}. evinden geçiyor` + (withTexts ? `\n  Leo (s. ${mh.p}): "${mh.tr}"` : ''));
+    }
+    return out.join('\n');
+  }
+
+  function yearBlock(ch, nowMs) {
+    const res = root.AstroSkyUI.residence(ch.input);
+    const sr = S.solarReturn(ch, nowMs, res.lat, res.lon, ch.input.houseSystem), prof = S.profection(ch, sr.age);
+    const out = ['## YILLIK DÖNEM', `Yaş: ${sr.age}. Son güneş dönüşü (tahvîl-i sâl): ${fD(sr.ms)}, ${res.name} için hesaplandı; o haritada yükselen ${deg(sr.chart.asc)}, Ay ${deg(sr.chart.planets[1].lon)} ve ${sr.chart.planets[1].house}. evde. Sonraki güneş dönüşü: ${fD(sr.next)}.`,
+      `Yıllık intihâ (profeksiyon): bu yıl ${prof.house}. ev aktif, burç ${D.SIGNS[prof.sign].tr}, yılın efendisi ${PN(prof.lord)}.`];
+    return out.join('\n');
+  }
+
+  function build(o) {
+    const { ch, W, Z } = DATA, nowMs = Date.now(), i = ch.input;
+    const parts = [
+      'Aşağıda kendi doğum haritamın, "Zâyiçe" adlı astroloji uygulamasının hesapladığı verileri var. Konumlar hassas efemeris hesabıdır (Swiss Ephemeris ile karşılaştırılıp doğrulanmıştır); lütfen konumları yeniden hesaplamaya çalışma, bu değerleri kullan.',
+      'Cevap verirken: (1) hangi verilere dayandığını açıkça belirt; (2) aşağıda klasik kaynaklardan alıntı (Alan Leo vb.) varsa, kaynağın söylediği ile senin modern yorumunu ayrı tut; (3) veride olmayan bir konumu ya da açıyı uydurma; (4) emin olmadığın yerde bunu söyle. Cevabı Türkçe ver.',
+      `Bugünün tarihi: ${fD(nowMs)}.`
+    ];
+    if (o.personal) parts.push(`Doğum bilgisi: ${String(i.day).padStart(2, '0')}.${String(i.month).padStart(2, '0')}.${i.year} saat ${String(i.hour).padStart(2, '0')}:${String(i.minute).padStart(2, '0')} (yerel saat), ${i.city || ''} (${i.lat.toFixed(2)}°, ${i.lon.toFixed(2)}°).`);
+    parts.push(natalBlock(ch, W));
+    if (o.classical) parts.push(classicalBlock(ch, Z));
+    if (o.transits) parts.push(transitBlock(ch, nowMs, o.months));
+    if (o.prog) parts.push(progBlock(ch, nowMs, o.texts));
+    if (o.year) parts.push(yearBlock(ch, nowMs));
+    parts.push('## SORUM', o.q && o.q.trim() ? o.q.trim() : '(Sorunu buraya yaz.)');
+    return parts.join('\n\n');
+  }
+
+  function opts() {
+    return { q: $('#askQ').value, personal: $('#askPersonal').checked, classical: $('#askClassical').checked, transits: $('#askTransits').checked,
+      prog: $('#askProg').checked, year: $('#askYear').checked, texts: $('#askTexts').checked, months: +$('#askMonths').value };
+  }
+  function refresh() {
+    if (!DATA) return;
+    let t; try { t = build(opts()); } catch (e) { console.error(e); t = 'Metin hazırlanırken hata: ' + e.message; }
+    $('#askOut').value = t;
+    $('#askCount').textContent = `${t.length.toLocaleString('tr-TR')} karakter`;
+  }
+  async function copy() {
+    refresh(); const t = $('#askOut').value; let ok = false;
+    try { if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(t); ok = true; } } catch (e) { }
+    if (!ok) { const ta = $('#askOut'); ta.focus(); ta.select(); try { ok = document.execCommand('copy'); } catch (e) { } ta.setSelectionRange(0, 0); }
+    $('#askMsg').textContent = ok ? 'Kopyalandı. Şimdi yapay zekâ uygulamanı açıp mesaj kutusuna yapıştır.' : 'Otomatik kopyalanamadı. Aşağıdaki kutudaki metni seçip elle kopyala.';
+  }
+  async function share() {
+    refresh(); const t = $('#askOut').value;
+    try { await navigator.share({ title: 'Doğum haritası verileri', text: t }); $('#askMsg').textContent = ''; }
+    catch (e) { if (e && e.name !== 'AbortError') $('#askMsg').textContent = 'Paylaşım açılamadı; "Kopyala" düğmesini kullan.'; }
+  }
+
+  function render(ch, W, Z) {
+    TZ = (root.AstroSkyUI && root.AstroSkyUI.residence(ch.input).tz) || ch.input.tz || TZ;
+    DATA = { ch, W, Z };
+    const el = $('#p-soru');
+    if (!el.dataset.built) {
+      el.dataset.built = '1';
+      el.innerHTML = `<section class="card"><h2>Yapay Zekâya Soru Sor</h2>
+        <p>Bu sekme hiçbir yere bağlanmaz. Haritanın hesaplanmış verilerini tek bir metin hâline getirir; sen bu metni kullandığın yapay zekâya (Claude, ChatGPT, Gemini…) yapıştırıp sorunu sorarsın. Metnin başında yapay zekâya konumları yeniden hesaplamaması, veride olmayanı uydurmaması ve kaynak alıntısıyla kendi yorumunu ayırması söylenir.</p>
+        <label for="askQ"><b>Sorun</b></label>
+        <textarea id="askQ" rows="3" placeholder="Örnek: Önümüzdeki 6 ay iş değiştirmek için nasıl görünüyor? Hangi tarihler öne çıkıyor?"></textarea>
+        <div class="askopts">
+          <label><input type="checkbox" id="askClassical" checked> Klasik (zâyiçe) bilgileri</label>
+          <label><input type="checkbox" id="askTransits" checked> Transitler</label>
+          <label>Transit süresi <select id="askMonths"><option value="3">3 ay</option><option value="6" selected>6 ay</option><option value="12">12 ay</option></select></label>
+          <label><input type="checkbox" id="askProg" checked> İlerletimler</label>
+          <label><input type="checkbox" id="askTexts" checked> Leo'nun yorum metinlerini ekle</label>
+          <label><input type="checkbox" id="askYear" checked> Yıllık dönem</label>
+          <label><input type="checkbox" id="askPersonal"> Doğum tarihi, saati ve yerini de ekle</label>
+        </div>
+        <p class="muted small">Doğum tarihi ve yeri varsayılan olarak metne eklenmez; gezegen konumları yorum için yeterlidir. Ad hiçbir zaman eklenmez.</p>
+        <div class="askbtns"><button type="button" id="askCopy" class="btn">Kopyala</button>${navigator.share ? '<button type="button" id="askShare" class="btn sec">Paylaş (telefonda doğrudan uygulamaya gönder)</button>' : ''}<span id="askCount" class="muted small"></span></div>
+        <p id="askMsg" class="small"></p>
+        <details><summary>Kopyalanacak metni göster</summary><textarea id="askOut" rows="16" readonly></textarea></details>
+        <p class="muted small">İpucu: Aynı sohbette yeni sorular sormaya devam edebilirsin; verileri tekrar yapıştırmana gerek yok. Başka bir kişi ya da başka bir gün için yeni bir sohbet açıp metni yeniden kopyala.</p>
+      </section>`;
+      el.addEventListener('input', refresh); el.addEventListener('change', refresh);
+      $('#askCopy').addEventListener('click', copy);
+      if ($('#askShare')) $('#askShare').addEventListener('click', share);
+    }
+    refresh();
+  }
+  root.AstroAsk = { render, build };
+})(window);
+</script>
 <script>/* Arayüz */
 (function () {
   const C = window.AstroCore, D = window.AstroData, A = window.AstroAnalysis;
@@ -2556,6 +2735,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     try { X = window.AstroSkyUI.render(ch, W, Z, Date.now()); } catch (e) { console.error(e); msg('Göksel olaylar bölümü hesaplanırken hata: ' + e.message, true); }
     try { const pr = window.AstroProgUI.render(ch, Date.now(), window.AstroSkyUI.residence(ch.input)); if (X) X.prog = pr; } catch (e) { console.error(e); msg('İlerletim bölümü hesaplanırken hata: ' + e.message, true); }
     renderCompare(ch, W, Z, K, X);
+    try { window.AstroAsk.render(ch, W, Z); } catch (e) { console.error(e); msg('Soru sekmesi hazırlanırken hata: ' + e.message, true); }
     $('#printHead').innerHTML = header(ch);
     showTab('ozet');
     const i = ch.input;
