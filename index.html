@@ -27,7 +27,7 @@ h3{margin:0 0 4px;font-size:16.5px;color:#3b2f12}
 .item p{margin:0}
 form .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px 14px}
 label{display:block;font-size:13.5px;color:var(--muted)}
-input,select{width:100%;padding:8px 9px;border:1px solid #c9b88f;border-radius:4px;background:#fffdf7;font:inherit;color:var(--ink)}
+input:not([type=checkbox]):not([type=radio]):not([type=file]),select{width:100%;padding:8px 9px;border:1px solid #c9b88f;border-radius:4px;background:#fffdf7;font:inherit;color:var(--ink)}
 .btns{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
 button{font:inherit;cursor:pointer;border-radius:4px}
 .btn{padding:9px 16px;border:1px solid var(--accent);background:var(--accent);color:#f4ead2}
@@ -115,6 +115,77 @@ details summary{cursor:pointer;color:var(--accent)}
 .evd{font-size:13.5px}.evi{font-size:19px;text-align:center;color:var(--gold);font-family:"Segoe UI Symbol","DejaVu Sans",sans-serif}
 .ev.ecl{background:#fbf0d8}.ev.fast{font-size:14px;color:#4a4436}.ev.ecl .evi{color:#8a3b1f}
 footer{text-align:center;font-size:12.5px;color:var(--muted);padding:10px}
+
+/* ===== Modern görünüm (Sürüm 10) ===== */
+:root{--paper:#f5f3ee;--card:#ffffff;--ink:#1c2333;--muted:#5f6b7f;--gold:#b5862a;--line:#e6e1d6;--accent:#26386a;--accent2:#3b5299;--soft:#f3f0e8;--pos:#22764f;--neg:#b03a3a;
+  --r:14px;--shadow:0 1px 2px rgba(16,24,40,.05),0 6px 18px rgba(16,24,40,.05);--sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;--serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif}
+body{font:16px/1.65 var(--sans);background:var(--paper);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+header.top{background:linear-gradient(135deg,#1b2650 0%,#2d4486 60%,#3b2f6b 100%);border-bottom:0;padding:26px 20px 22px;position:relative;overflow:hidden}
+header.top::after{content:"";position:absolute;inset:0;background:radial-gradient(1px 1px at 12% 30%,#fff8 50%,transparent 51%),radial-gradient(1px 1px at 78% 22%,#fff9 50%,transparent 51%),radial-gradient(1.5px 1.5px at 62% 70%,#fff6 50%,transparent 51%),radial-gradient(1px 1px at 30% 80%,#fff7 50%,transparent 51%),radial-gradient(1px 1px at 90% 60%,#fff8 50%,transparent 51%);pointer-events:none}
+header.top h1{font-family:var(--serif);font-size:32px;letter-spacing:.14em;color:#fbf3dd}
+header.top p{font-size:14px;color:#d9def0;opacity:1}
+main{max-width:1120px;padding:20px 16px 70px}
+.card{border:1px solid var(--line);border-radius:var(--r);padding:22px 24px;margin:0 0 18px;box-shadow:var(--shadow)}
+h2{font-family:var(--serif);font-size:22px;font-weight:600;color:var(--accent);border-bottom:0;padding-bottom:0;margin:0 0 14px;display:flex;align-items:center;gap:10px}
+h2::before{content:"";width:4px;height:20px;border-radius:2px;background:var(--gold);flex:none}
+h3{font-size:16.5px;font-weight:600;color:#2b2414;line-height:1.4}
+h4{margin:10px 0 4px;font-size:15px;font-weight:600;color:var(--accent)}
+p{margin:0 0 10px}
+.item{padding:12px 0;border-bottom:1px solid var(--line)}
+label{font-size:13.5px;color:var(--muted);font-weight:500}
+form .grid{gap:12px 16px}
+input:not([type=checkbox]):not([type=radio]):not([type=file]),select,textarea{border:1px solid #d6d0c2;border-radius:10px;padding:10px 12px;background:#fff;font:15px/1.4 var(--sans);color:var(--ink);margin-top:4px;transition:border-color .15s,box-shadow .15s}
+input:focus,select:focus,textarea:focus{outline:0;border-color:var(--accent2);box-shadow:0 0 0 3px rgba(59,82,153,.18)}
+input[type=checkbox],input[type=radio]{accent-color:var(--accent);width:18px;height:18px;flex:none;margin:0;vertical-align:middle}
+button{border-radius:10px}
+.btn{padding:10px 18px;border-radius:10px;border:1px solid var(--accent);background:var(--accent);color:#fff;font:600 15px/1.2 var(--sans);transition:background .15s,transform .05s,box-shadow .15s}
+.btn:hover{background:var(--accent2);border-color:var(--accent2)}
+.btn:active{transform:translateY(1px)}
+.btn.sec{background:#fff;color:var(--accent);border-color:#cfd5e6}
+.btn.sec:hover{background:#eef1f9;border-color:var(--accent2)}
+.btn:focus-visible,.tab:focus-visible,.linkbtn:focus-visible{outline:3px solid rgba(59,82,153,.35);outline-offset:2px}
+.msg{font-size:14px}
+.chip{border:1px solid #d9d2bf;border-radius:999px;background:#fff}
+.chip button{background:transparent;padding:4px 12px;border-radius:0}.chip .del{background:#f1ece0;color:var(--muted)}
+.tabs{position:sticky;top:0;z-index:10;display:flex;flex-wrap:nowrap;gap:4px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;
+  margin:4px -16px 18px;padding:10px 16px;border-bottom:0;background:rgba(245,243,238,.92);backdrop-filter:saturate(1.4) blur(8px);-webkit-backdrop-filter:saturate(1.4) blur(8px)}
+.tabs::-webkit-scrollbar{display:none}
+.tab{flex:0 0 auto;white-space:nowrap;border:1px solid var(--line);background:#fff;color:var(--ink);padding:8px 15px;border-radius:999px;font:500 14.5px/1.2 var(--sans);transition:background .15s,color .15s,border-color .15s}
+.tab:hover{border-color:#c9c2b0;background:#fbfaf6}
+.tab.on{background:var(--accent);color:#fff;border-color:var(--accent);box-shadow:0 2px 8px rgba(38,56,106,.25)}
+.t{font-size:14.5px}
+.t th,.t td{border-bottom:1px solid var(--line);padding:7px 8px}
+.t th{font-size:12px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:600}
+.t tbody tr:hover td{background:#faf8f3}
+tr.cur td{background:#fbf1d6!important}
+.tag{border-radius:999px;padding:1px 9px;font-size:12px;font-weight:500}
+.big3>div{border:1px solid var(--line);border-radius:12px;background:linear-gradient(180deg,#fff,#faf7f0);padding:14px 10px}
+.big3 .v{font-family:var(--serif);font-size:20px}
+.moonbox{border-radius:12px;background:#faf7f0}
+.hr{border-radius:10px;border-color:var(--line);background:#fff;padding:7px 6px}
+.hr.nt{background:#f0f2f8}.hr.now{outline:2px solid var(--gold);background:#fbf1d6}
+.ptq{border-left-width:4px;border-radius:0 10px 10px 0}
+.ptwhy{border-radius:10px}
+details{margin:6px 0}
+details>summary{list-style:none;cursor:pointer;color:var(--accent);font-weight:500;padding:6px 0;display:flex;align-items:center;gap:8px}
+details>summary::-webkit-details-marker{display:none}
+details>summary::before{content:"";width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .15s;flex:none;margin:0 2px}
+details[open]>summary::before{transform:rotate(45deg)}
+.gridwrap{border-radius:10px}
+.agrid th,.agrid td{border-color:var(--line)}
+.agrid th,.agrid td.diag{background:var(--soft)}
+.upd{border-radius:14px;box-shadow:0 10px 30px rgba(16,24,40,.25)}
+footer{padding:18px 10px 28px}
+@media(max-width:820px){
+  body{font-size:15.5px}
+  header.top{padding:14px 14px 12px}header.top h1{font-size:23px}header.top p{font-size:12.5px}
+  main{padding:12px 10px 60px}
+  .card{padding:16px 15px;border-radius:12px}
+  h2{font-size:19px}
+  .tabs{margin:0 -10px 12px;padding:8px 10px}
+  .tab{padding:7px 13px;font-size:14px}
+  .btns .btn{flex:1 1 45%;padding:11px 8px}
+}
 @media print{
   @page{size:A4;margin:14mm 12mm}
   body{background:#fff;font-size:11.5pt}
@@ -134,23 +205,26 @@ footer{text-align:center;font-size:12.5px;color:var(--muted);padding:10px}
   #p-zayice .sq{max-width:330px}
   #p-zayice .two{display:block}
 }
-details.leo{border-top:1px solid #e6dfcf;padding:6px 0}
-details.leo summary{cursor:pointer}
-details.leo.cur summary{background:#fbf3dc}
-#p-soru textarea{width:100%;box-sizing:border-box;font:inherit;padding:8px;border:1px solid #cdbf9f;border-radius:6px;background:#fffdf7}
-#askOut{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px}
-.askopts{display:flex;flex-wrap:wrap;gap:6px 18px;margin:10px 0}
-.askopts label{white-space:nowrap}
-.askbtns{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:8px 0}
-.askbtns button{padding:9px 18px}
+details.leo{border-top:1px solid var(--line);padding:4px 0;margin:0}
+details.leo>summary{padding:8px 6px;border-radius:8px;color:var(--ink);font-weight:400;flex-wrap:wrap}
+details.leo>summary:hover{background:#faf8f3}
+details.leo.cur>summary{background:#fbf1d6}
+details.leo>p{padding:0 6px}
+#p-soru textarea{width:100%;min-height:90px;resize:vertical}
+#askOut{font:12.5px/1.5 ui-monospace,"Cascadia Mono",Consolas,Menlo,monospace;min-height:260px}
+.askopts{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px 18px;margin:14px 0 6px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:#faf8f3}
+.askopts label{display:flex;align-items:center;justify-content:flex-start;gap:10px;text-align:left;color:var(--ink);font-size:14.5px;font-weight:400;cursor:pointer;margin:0;min-width:0}
+.askopts label span{white-space:normal}
+.askopts select{width:auto;margin:0;padding:6px 10px}
+.askbtns{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:12px 0}
 @media print{#p-soru{display:none!important}}
-.linkbtn{background:none;border:0;padding:0;color:var(--accent);text-decoration:underline;cursor:pointer;font:inherit}
-.booklinks{margin:6px 0 6px 18px;padding:0}.booklinks li{margin:4px 0}
+.linkbtn{background:none;border:0;padding:0;color:var(--accent2);text-decoration:underline;text-underline-offset:3px;cursor:pointer;font:inherit;border-radius:4px}
+.booklinks{margin:6px 0 10px 20px;padding:0}.booklinks li{margin:6px 0}
 @media print{#bookCard{display:none!important}}
 </style>
 </head>
 <body>
-<header class="top"><h1>ZÂYİÇE</h1><p>Doğum haritası · Batı ve klasik Doğu geleneği</p></header>
+<header class="top"><h1>✦ ZÂYİÇE ✦</h1><p>Doğum haritası · Batı ve klasik Doğu geleneği</p></header>
 <main>
   <section class="card" id="formCard">
     <h2>Doğum Bilgileri</h2>
@@ -211,7 +285,7 @@ details.leo.cur summary{background:#fbf3dc}
     <div class="panel" id="p-soru"></div>
   </div>
 </main>
-<footer>Gezegen konumları astronomy-engine (MIT lisansı) ile hesaplanır; Swiss Ephemeris ile karşılaştırılarak doğrulanmıştır. Sürüm 9 · İnternetsiz çalışır.</footer>
+<footer>Gezegen konumları astronomy-engine (MIT lisansı) ile hesaplanır; Swiss Ephemeris ile karşılaştırılarak doğrulanmıştır. Sürüm 10 · İnternetsiz çalışır.</footer>
 <div id="updBar" class="upd" hidden>Yeni sürüm hazır. <button type="button" class="btn" id="updBtn">Yenile</button></div>
 <script>/*
  MIT
@@ -2623,13 +2697,13 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
         <label for="askQ"><b>Sorun</b></label>
         <textarea id="askQ" rows="3" placeholder="Örnek: Önümüzdeki 6 ay iş değiştirmek için nasıl görünüyor? Hangi tarihler öne çıkıyor?"></textarea>
         <div class="askopts">
-          <label><input type="checkbox" id="askClassical" checked> Klasik (zâyiçe) bilgileri</label>
-          <label><input type="checkbox" id="askTransits" checked> Transitler</label>
-          <label>Transit süresi <select id="askMonths"><option value="3">3 ay</option><option value="6" selected>6 ay</option><option value="12">12 ay</option></select></label>
-          <label><input type="checkbox" id="askProg" checked> İlerletimler</label>
-          <label><input type="checkbox" id="askTexts" checked> Leo'nun yorum metinlerini ekle</label>
-          <label><input type="checkbox" id="askYear" checked> Yıllık dönem</label>
-          <label><input type="checkbox" id="askPersonal"> Doğum tarihi, saati ve yerini de ekle</label>
+          <label><input type="checkbox" id="askClassical" checked><span>Klasik (zâyiçe) bilgileri</span></label>
+          <label><input type="checkbox" id="askTransits" checked><span>Transitler</span></label>
+          <label><span>Transit süresi</span> <select id="askMonths"><option value="3">3 ay</option><option value="6" selected>6 ay</option><option value="12">12 ay</option></select></label>
+          <label><input type="checkbox" id="askProg" checked><span>İlerletimler</span></label>
+          <label><input type="checkbox" id="askTexts" checked><span>Leo'nun yorum metinlerini ekle</span></label>
+          <label><input type="checkbox" id="askYear" checked><span>Yıllık dönem</span></label>
+          <label><input type="checkbox" id="askPersonal"><span>Doğum tarihi, saati ve yerini de ekle</span></label>
         </div>
         <p class="muted small">Doğum tarihi ve yeri varsayılan olarak metne eklenmez; gezegen konumları yorum için yeterlidir. Ad hiçbir zaman eklenmez.</p>
         <div class="askbtns"><button type="button" id="askCopy" class="btn">Kopyala</button>${navigator.share ? '<button type="button" id="askShare" class="btn sec">Paylaş (telefonda doğrudan uygulamaya gönder)</button>' : ''}<span id="askCount" class="muted small"></span></div>
@@ -2845,11 +2919,12 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
         <ul class="toc">
           <li><b>Batı Haritası</b> — modern astrolojinin dairesel haritası, gezegen konumları, açılar ve yorumlar.</li>
           <li><b>Zâyiçe</b> — Osmanlı/İslam dünyasının klasik ilm-i ahkâm-ı nücûm geleneği: yedi seyyâre, makamlar, sa'd-nahs, talih noktası, Ay menzili, fardâr dönemleri.</li>
-          <li><b>Bugünkü Gökyüzü</b> — şu anki gezegenler, Ay'ın evresi ve menzili, sana etki eden transitler, bugünün gezegen saatleri.</li>
+          <li><b>Bugünkü Gökyüzü</b> — şu anki gezegenler, Ay'ın evresi ve menzili, sana etki eden transitler, bugünün gezegen saatleri ve Saatlerin Hazinesi kitabına sayfa bağlantıları.</li>
           <li><b>Takvim</b> — önümüzdeki 12 ayın tutulmaları, Yeni Ay ve Dolunayları, burç değişimleri, retro dönemleri ve yaklaşan transitler.</li>
           <li><b>Yıllık Dönem</b> — tahvîl-i sâl (yıllık harita), intihâ ve yılın sahibi, Jüpiter–Satürn dönüşleri, kırânlar.</li>
           <li><b>İlerletim</b> — ilerletilmiş harita (bir gün = bir yıl), ilerletilmiş Ay ve 30 yıllık evre döngüsü, güneş yayı yönlendirmeleri, Ay dönüşü, ömür boyu ilerletim takvimi.</li>
           <li><b>Karşılaştırma</b> — iki geleneğin aynı doğum anına ne dediği: ${K.agree} noktada örtüşüyor, ${K.differ} noktada ayrışıyor.</li>
+          <li><b>Soru Sor</b> — haritanın, transitlerin ve ilerletimlerin verilerini tek metin hâline getirir; kopyalayıp kullandığın yapay zekâya kendi sorunla birlikte yapıştırırsın.</li>
         </ul>
         <p class="muted small">Gezegen konumları gerçek astronomik hesaptır. Yorumlar ise tarihî bir sembol sisteminin geleneksel okumalarıdır; bilimsel olarak kanıtlanmış tahminler değildir. Merak ve kültürel inceleme amacıyla okunmalıdır.</p>
       </section>`;
