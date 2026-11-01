@@ -116,7 +116,7 @@ details summary{cursor:pointer;color:var(--accent)}
 .ev.ecl{background:#fbf0d8}.ev.fast{font-size:14px;color:#4a4436}.ev.ecl .evi{color:#8a3b1f}
 footer{text-align:center;font-size:12.5px;color:var(--muted);padding:10px}
 
-/* ===== Modern görünüm (Sürüm 10) ===== */
+/* ===== Modern görünüm (Sürüm 11) ===== */
 :root{--paper:#f5f3ee;--card:#ffffff;--ink:#1c2333;--muted:#5f6b7f;--gold:#b5862a;--line:#e6e1d6;--accent:#26386a;--accent2:#3b5299;--soft:#f3f0e8;--pos:#22764f;--neg:#b03a3a;
   --r:14px;--shadow:0 1px 2px rgba(16,24,40,.05),0 6px 18px rgba(16,24,40,.05);--sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;--serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif}
 body{font:16px/1.65 var(--sans);background:var(--paper);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
@@ -285,7 +285,7 @@ details.leo>p{padding:0 6px}
     <div class="panel" id="p-soru"></div>
   </div>
 </main>
-<footer>Gezegen konumları astronomy-engine (MIT lisansı) ile hesaplanır; Swiss Ephemeris ile karşılaştırılarak doğrulanmıştır. Sürüm 10 · İnternetsiz çalışır.</footer>
+<footer>Gezegen konumları astronomy-engine (MIT lisansı) ile hesaplanır; Swiss Ephemeris ile karşılaştırılarak doğrulanmıştır. Sürüm 11 · İnternetsiz çalışır.</footer>
 <div id="updBar" class="upd" hidden>Yeni sürüm hazır. <button type="button" class="btn" id="updBtn">Yenile</button></div>
 <script>/*
  MIT
@@ -1241,7 +1241,8 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       // gün doğumundaki yerel hafta günü
       const localRise = new Date(rise + ch.offsetMin * 60000);
       const wd = localRise.getUTCDay();
-      planetDay = { ruler: D.DAY_RULERS[wd], weekday: D.WEEKDAYS[wd] };
+      const cwd = new Date(Date.UTC(ch.input.year, ch.input.month - 1, ch.input.day)).getUTCDay();
+      planetDay = { ruler: D.DAY_RULERS[wd], weekday: D.WEEKDAYS[wd], calWeekday: D.WEEKDAYS[cwd], beforeSunrise: wd !== cwd };
       let idx;
       if (set && birth < set) { idx = Math.floor((birth - rise) / ((set - rise) / 12)); }
       else if (set && nextRise) { idx = 12 + Math.floor((birth - set) / ((nextRise - set) / 12)); }
@@ -2913,7 +2914,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       <section class="card avoid"><h2>Kısa Özet</h2>${header(ch)}
         <div class="big3">${big3.map(([k, s]) => `<div><div class="g">${SG(s)}</div><div class="k">${k}</div><div class="v">${D.SIGNS[s].tr}</div></div>`).join('')}</div>
         <p>${D.SIGNS[b.sun.sign].core}</p>
-        <p class="muted">Doğum ${Z.isDay ? 'gündüz' : 'gece'} gerçekleşmiş (Güneş ufkun ${Z.isDay ? 'üstünde' : 'altında'}). Baskın element: <b>${D.ELEMENTS[W.domEl[0][0]].tr}</b>, baskın nitelik: <b>${D.MODES[W.domMd[0][0]].tr}</b>. ${Z.planetDay ? `Doğum günü <b>${Z.planetDay.weekday}</b> (${D.PLANETS[Z.planetDay.ruler].ot} günü)` : ''}${Z.planetHour ? `, gezegen saati <b>${D.PLANETS[Z.planetHour].ot}</b>.` : '.'}</p>
+        <p class="muted">Doğum ${Z.isDay ? 'gündüz' : 'gece'} gerçekleşmiş (Güneş ufkun ${Z.isDay ? 'üstünde' : 'altında'}). Baskın element: <b>${D.ELEMENTS[W.domEl[0][0]].tr}</b>, baskın nitelik: <b>${D.MODES[W.domMd[0][0]].tr}</b>. ${Z.planetDay ? (Z.planetDay.beforeSunrise ? `Doğum günü takvimde <b>${Z.planetDay.calWeekday}</b>; güneş doğmadan önce olduğu için gezegen saati hesabında hâlâ ${({ 'Pazar': "Pazar'ın", 'Pazartesi': "Pazartesi'nin", 'Salı': "Salı'nın", 'Çarşamba': "Çarşamba'nın", 'Perşembe': "Perşembe'nin", 'Cuma': "Cuma'nın", 'Cumartesi': "Cumartesi'nin" })[Z.planetDay.weekday]} gece saatlerine, yani <b>${D.PLANETS[Z.planetDay.ruler].ot}</b> gününe sayılır` : `Doğum günü <b>${Z.planetDay.weekday}</b> (${D.PLANETS[Z.planetDay.ruler].ot} günü)`) : ''}${Z.planetHour ? `, gezegen saati <b>${D.PLANETS[Z.planetHour].ot}</b>.` : '.'}</p>
       </section>
       <section class="card avoid"><h2>Bölümler</h2>
         <ul class="toc">
@@ -3156,7 +3157,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
         <p>Ay doğum anında 28 konaktan <b>${Z.mansion + 1}. menzil olan ${m[0]}</b>'da bulunuyordu (anlamı: ${m[1]}). Eski Arap gökbiliminde Ay her gece bu konaklardan birine "konar"; menziller hem takvim hem de ihtiyârât (uygun vakit seçimi) için kullanılırdı.</p>
       </section>
       <section class="card avoid"><h2>Gezegen Günü ve Saati</h2>
-        ${Z.planetDay ? `<p>Klasik usulde gün, güneşin doğuşuyla başlar. Doğum, <b>${Z.planetDay.weekday}</b> gününe, yani <b>${D.PLANETS[Z.planetDay.ruler].ot}</b> gününe düşer${Z.planetHour ? `; gün ve gece on ikişer eşit saate bölündüğünde doğum <b>${Z.hourNo > 12 ? 'gecenin ' + (Z.hourNo - 12) : 'gündüzün ' + Z.hourNo}. saatine</b> rastlar. Bu saatin sahibi <b>${D.PLANETS[Z.planetHour].ot}</b>'dir.` : '.'} Osmanlı saatnâmelerinde ve "eşref saat" anlayışında bu gezegen saatleri esas alınırdı.</p>` : '<p>Bu enlemde güneşin doğuş ve batışı hesaplanamadı.</p>'}
+        ${Z.planetDay ? `<p>Gezegen saatleri hesabında gün, güneşin doğuşuyla başlar. ${Z.planetDay.beforeSunrise ? `Doğum takvimde <b>${Z.planetDay.calWeekday}</b> günü, ama güneş doğmadan önce olduğu için ${Z.planetDay.weekday} gününün gece saatlerine düşer; bu yüzden gezegen günü <b>${D.PLANETS[Z.planetDay.ruler].ot}</b> günüdür. (Halk dilinde ve hicrî takvimde gün akşam ezanıyla başladığından bu saatlere "${Z.planetDay.calWeekday} gecesi" de denir; ikisi aynı ânı anlatır.)` : `Doğum, <b>${Z.planetDay.weekday}</b> gününe, yani <b>${D.PLANETS[Z.planetDay.ruler].ot}</b> gününe düşer`}${Z.planetHour ? `; gün ve gece on ikişer eşit saate bölündüğünde doğum <b>${Z.hourNo > 12 ? 'gecenin ' + (Z.hourNo - 12) : 'gündüzün ' + Z.hourNo}. saatine</b> rastlar. Bu saatin sahibi <b>${D.PLANETS[Z.planetHour].ot}</b>'dir.` : '.'} Osmanlı saatnâmelerinde ve "eşref saat" anlayışında bu gezegen saatleri esas alınırdı.</p>` : '<p>Bu enlemde güneşin doğuş ve batışı hesaplanamadı.</p>'}
       </section>
       <section class="card avoid"><h2>Fardâr: Hayatın Gezegen Dönemleri</h2>
         <p class="muted small">İran kökenli bu usulde hayat, ${Z.isDay ? 'gündüz doğumunda Şems\'ten' : 'gece doğumunda Kamer\'den'} başlayarak sırayla gezegenlerin yönettiği dönemlere ayrılır (toplam 75 yıl). Her gezegen dönemi yedi alt döneme bölünür. Şu an yaklaşık ${Math.floor(ageNow)} yaşındasın.</p>
