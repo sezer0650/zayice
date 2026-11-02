@@ -116,7 +116,7 @@ details summary{cursor:pointer;color:var(--accent)}
 .ev.ecl{background:#fbf0d8}.ev.fast{font-size:14px;color:#4a4436}.ev.ecl .evi{color:#8a3b1f}
 footer{text-align:center;font-size:12.5px;color:var(--muted);padding:10px}
 
-/* ===== Modern görünüm (Sürüm 11) ===== */
+/* ===== Modern görünüm (Sürüm 12) ===== */
 :root{--paper:#f5f3ee;--card:#ffffff;--ink:#1c2333;--muted:#5f6b7f;--gold:#b5862a;--line:#e6e1d6;--accent:#26386a;--accent2:#3b5299;--soft:#f3f0e8;--pos:#22764f;--neg:#b03a3a;
   --r:14px;--shadow:0 1px 2px rgba(16,24,40,.05),0 6px 18px rgba(16,24,40,.05);--sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;--serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif}
 body{font:16px/1.65 var(--sans);background:var(--paper);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
@@ -205,6 +205,7 @@ footer{padding:18px 10px 28px}
   #p-zayice .sq{max-width:330px}
   #p-zayice .two{display:block}
 }
+.fsumbtns{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.fsumbtns select{width:auto;margin:0;padding:8px 10px;max-width:60vw}
 details.leo{border-top:1px solid var(--line);padding:4px 0;margin:0}
 details.leo>summary{padding:8px 6px;border-radius:8px;color:var(--ink);font-weight:400;flex-wrap:wrap}
 details.leo>summary:hover{background:#faf8f3}
@@ -228,7 +229,7 @@ details.leo>p{padding:0 6px}
 <main>
   <section class="card" id="formCard">
     <h2>Doğum Bilgileri</h2>
-    <div id="formSummary" class="fsum"><span id="fsumText"></span> <button type="button" class="btn sec" id="editBtn">Bilgileri düzenle</button></div>
+    <div id="formSummary" class="fsum"><span id="fsumText"></span> <span class="fsumbtns"><select id="switchSel" aria-label="Kişi değiştir"></select><button type="button" class="btn sec" id="editBtn">Düzenle</button></span></div>
     <form id="form" autocomplete="off">
       <div class="grid">
         <label>Ad (isteğe bağlı)<input id="name" placeholder="ör. Sezer"></label>
@@ -285,7 +286,7 @@ details.leo>p{padding:0 6px}
     <div class="panel" id="p-soru"></div>
   </div>
 </main>
-<footer>Gezegen konumları astronomy-engine (MIT lisansı) ile hesaplanır; Swiss Ephemeris ile karşılaştırılarak doğrulanmıştır. Sürüm 11 · İnternetsiz çalışır.</footer>
+<footer>Gezegen konumları astronomy-engine (MIT lisansı) ile hesaplanır; Swiss Ephemeris ile karşılaştırılarak doğrulanmıştır. Sürüm 12 · İnternetsiz çalışır.</footer>
 <div id="updBar" class="upd" hidden>Yeni sürüm hazır. <button type="button" class="btn" id="updBtn">Yenile</button></div>
 <script>/*
  MIT
@@ -2809,7 +2810,10 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
   const SG = i => D.SIGNS[i].g + '︎';
   const fmtDate = ms => new Date(ms).toLocaleDateString('tr-TR', { year: 'numeric', month: 'long', day: 'numeric' });
   const LS_KEY = 'zayice_kayitlar_v1', LS_ASP = 'zayice_aci_ayar_v1';
-  let LAST = null;
+  let LAST = null, CUR = null, RESTORE = null;
+  const snap = () => ({ name: $('#name').value.trim(), date: $('#date').value, time: $('#time').value, city: $('#city').value, lat: $('#lat').value, lon: $('#lon').value, tz: $('#tz').value, off: $('#off').value, hs: $('#hs').value, city2: $('#city2').value });
+  const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+  const push = (st) => { try { history.pushState(Object.assign({ v: 1 }, st), '', '#' + (st.tab || 'giris')); } catch (e) { } };
   function aspOpts() { try { const o = JSON.parse(localStorage.getItem(LS_ASP) || 'null'); if (o && Array.isArray(o.types)) return Object.assign({}, A.DEFAULT_OPTS, o); } catch (e) { } return Object.assign({}, A.DEFAULT_OPTS); }
   function saveAspOpts(o) { try { localStorage.setItem(LS_ASP, JSON.stringify(o)); } catch (e) { } }
 
@@ -2820,7 +2824,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     $('#city').addEventListener('change', onCity); $('#city').addEventListener('input', onCity);
     $('#form').addEventListener('submit', e => { e.preventDefault(); runSoon(); });
     $('#saveBtn').addEventListener('click', savePerson);
-    $('#editBtn').addEventListener('click', () => { $('#formCard').classList.remove('collapsed'); $('#formCard').scrollIntoView({ behavior: 'smooth' }); });
+    $('#editBtn').addEventListener('click', () => { push({ p: CUR, tab: currentTab(), edit: true }); $('#formCard').classList.remove('collapsed'); $('#formCard').scrollIntoView({ behavior: 'smooth' }); });
     $('#printBtn').addEventListener('click', () => {
       let framed = false; try { framed = window.self !== window.top; } catch (e) { framed = true; }
       if (framed) { msg('Bu görünümde yazdırma kapalı. PDF için indirdiğin zayice.html dosyasını bilgisayarında açıp bu düğmeye bas (ya da Ctrl+P).', true); return; }
@@ -2829,9 +2833,24 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     $('#exampleBtn').addEventListener('click', () => {
       fill({ name: 'Örnek kişi', date: '1985-05-21', time: '14:30', city: 'İstanbul', lat: 41.01, lon: 28.98, tz: 'Europe/Istanbul', off: '', hs: 'placidus' }); runSoon();
     });
-    document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => { showTab(b.dataset.tab); const top = $('#results').getBoundingClientRect().top + window.scrollY; if (window.scrollY > top) window.scrollTo(0, top); }));
+    document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => { if (b.classList.contains('on')) return; showTab(b.dataset.tab); push({ p: CUR, tab: b.dataset.tab }); const top = $('#results').getBoundingClientRect().top + window.scrollY; if (window.scrollY > top) window.scrollTo(0, top); }));
     renderSaved();
+    $('#switchSel').addEventListener('change', e => {
+      const v = e.target.value; e.target.value = '';
+      if (v === 'new') { push({ p: CUR, tab: currentTab(), edit: true }); $('#formCard').classList.remove('collapsed'); fill({ date: '', time: '', lat: '', lon: '' }); $('#name').focus(); return; }
+      const list = store() || []; if (list[+v]) { fill(list[+v]); runSoon(); }
+    });
+    try { history.replaceState({ v: 1, home: true }, '', location.pathname + location.search); } catch (e) { }
+    window.addEventListener('popstate', e => {
+      const st = e.state;
+      if (!st || st.home) { $('#formCard').classList.remove('collapsed'); window.scrollTo(0, 0); return; }
+      if (st.p && !same(st.p, CUR)) { fill(st.p); RESTORE = st; runSoon(); return; }
+      if (st.edit) { $('#formCard').classList.remove('collapsed'); $('#formCard').scrollIntoView(); }
+      else if (window.innerWidth < 820 && CUR) $('#formCard').classList.add('collapsed');
+      showTab(st.tab || 'ozet');
+    });
   }
+  function currentTab() { const b = document.querySelector('.tab.on'); return b ? b.dataset.tab : 'ozet'; }
   function onCity() {
     const c = D.CITIES.find(x => x[0].toLocaleLowerCase('tr') === $('#city').value.trim().toLocaleLowerCase('tr'));
     if (c) { $('#lat').value = c[1]; $('#lon').value = c[2]; $('#tz').value = c[3] || 'Europe/Istanbul'; }
@@ -2866,6 +2885,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
   }
   function renderSaved() {
     const list = store() || []; const box = $('#saved');
+    const sw = $('#switchSel'); if (sw) sw.innerHTML = '<option value="">Kişi değiştir…</option>' + list.map((p, i) => `<option value="${i}">${esc(p.name)}</option>`).join('') + '<option value="new">+ Yeni kişi</option>';
     box.innerHTML = list.length ? '<span class="muted">Kayıtlı kişiler:</span> ' + list.map((p, i) =>
       `<span class="chip"><button type="button" data-i="${i}" class="load">${esc(p.name)}</button><button type="button" data-d="${i}" class="del" title="Sil">×</button></span>`).join('') : '';
     box.querySelectorAll('.load').forEach(b => b.onclick = () => { fill(list[+b.dataset.i]); runSoon(); });
@@ -2895,7 +2915,9 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     renderCompare(ch, W, Z, K, X);
     try { window.AstroAsk.render(ch, W, Z); } catch (e) { console.error(e); msg('Soru sekmesi hazırlanırken hata: ' + e.message, true); }
     $('#printHead').innerHTML = header(ch);
-    showTab('ozet');
+    CUR = snap();
+    if (RESTORE) { showTab(RESTORE.tab || 'ozet'); RESTORE = null; }
+    else { showTab('ozet'); push({ p: CUR, tab: 'ozet' }); }
     const i = ch.input;
     $('#fsumText').innerHTML = `<b>${esc(i.name || 'Doğum haritası')}</b> · ${String(i.day).padStart(2, '0')}.${String(i.month).padStart(2, '0')}.${i.year} ${String(i.hour).padStart(2, '0')}:${String(i.minute).padStart(2, '0')} · ${esc(i.city || (i.lat.toFixed(2) + ', ' + i.lon.toFixed(2)))}`;
     if (window.innerWidth < 820) $('#formCard').classList.add('collapsed');
