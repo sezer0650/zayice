@@ -116,7 +116,7 @@ details summary{cursor:pointer;color:var(--accent)}
 .ev.ecl{background:#fbf0d8}.ev.fast{font-size:14px;color:#4a4436}.ev.ecl .evi{color:#8a3b1f}
 footer{text-align:center;font-size:12.5px;color:var(--muted);padding:10px}
 
-/* ===== Modern görünüm (Sürüm 13) ===== */
+/* ===== Modern görünüm (Sürüm 14) ===== */
 :root{--paper:#f5f3ee;--card:#ffffff;--ink:#1c2333;--muted:#5f6b7f;--gold:#b5862a;--line:#e6e1d6;--accent:#26386a;--accent2:#3b5299;--soft:#f3f0e8;--pos:#22764f;--neg:#b03a3a;
   --r:14px;--shadow:0 1px 2px rgba(16,24,40,.05),0 6px 18px rgba(16,24,40,.05);--sans:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;--serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif}
 body{font:16px/1.65 var(--sans);background:var(--paper);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
@@ -194,7 +194,7 @@ footer{padding:18px 10px 28px}
   .card{border:0;box-shadow:none;padding:0 0 8px;margin:0 0 10px;background:#fff}
   .avoid,.item,tr{break-inside:avoid;page-break-inside:avoid}
   h2,h3{break-after:avoid;page-break-after:avoid}
-  #p-bati,#p-zayice,#p-gokyuzu,#p-takvim,#p-yil,#p-ilerletim,#p-karsilastirma{break-before:page;page-break-before:always}
+  #p-bati,#p-haritalar,#p-zayice,#p-gokyuzu,#p-takvim,#p-yil,#p-ilerletim,#p-karsilastirma{break-before:page;page-break-before:always}
   .hours{grid-template-columns:repeat(6,1fr)}
   details{display:none}
   .card:has(.aspctl){display:none}
@@ -210,6 +210,12 @@ footer{padding:18px 10px 28px}
 .starlist{max-height:340px;overflow:auto;border:1px solid var(--line);border-radius:12px;padding:4px 10px;background:#faf8f3}
 .srow{display:grid;grid-template-columns:20px 1fr auto;gap:10px;align-items:center;padding:6px 2px;border-bottom:1px solid var(--line);color:var(--ink);font-size:14px;font-weight:400;cursor:pointer;margin:0}.srow[hidden]{display:none}.srow:last-child{border-bottom:0}
 .cb .glyph{display:inline-block;min-width:2.2em;font-family:"Segoe UI Symbol","Noto Sans Symbols 2","DejaVu Sans",sans-serif;color:var(--gold)}
+.ctype{display:flex;flex-wrap:wrap;gap:6px}.ctype .tab{font-size:13.5px;padding:7px 13px}
+.cform{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:flex-end;margin-top:10px}.cform label{min-width:130px}.cform select,.cform input{margin-top:4px}
+.cstep{display:flex;flex-wrap:wrap;gap:4px}.cstep .btn{padding:7px 10px;font-size:13px}
+.wheel.mw .pg{font-size:15px}.wheel .pg.r-in{fill:#1c2333}.wheel .pg.r-out{fill:#b03a3a}.wheel .pg.r-prg{fill:#6a3d9a}.wheel .pg.lbl{font-size:10px}
+.lg.r-in{color:#1c2333}.lg.r-out{color:#b03a3a}.lg.r-prg{color:#6a3d9a}
+@media print{#p-haritalar .ctype,#p-haritalar .cform{display:none}}
 details.leo{border-top:1px solid var(--line);padding:4px 0;margin:0}
 details.leo>summary{padding:8px 6px;border-radius:8px;color:var(--ink);font-weight:400;flex-wrap:wrap}
 details.leo>summary:hover{background:#faf8f3}
@@ -271,6 +277,7 @@ details.leo>p{padding:0 6px}
     <nav class="tabs">
       <button class="tab on" data-tab="ozet">Özet</button>
       <button class="tab" data-tab="bati">Batı Haritası</button>
+      <button class="tab" data-tab="haritalar">Harita Türleri</button>
       <button class="tab" data-tab="zayice">Zâyiçe</button>
       <button class="tab" data-tab="gokyuzu">Bugünkü Gökyüzü</button>
       <button class="tab" data-tab="takvim">Takvim (12 ay)</button>
@@ -281,6 +288,7 @@ details.leo>p{padding:0 6px}
     </nav>
     <div class="panel on" id="p-ozet"></div>
     <div class="panel" id="p-bati"></div>
+    <div class="panel" id="p-haritalar"></div>
     <div class="panel" id="p-zayice"></div>
     <div class="panel" id="p-gokyuzu"></div>
     <div class="panel" id="p-takvim"></div>
@@ -290,7 +298,7 @@ details.leo>p{padding:0 6px}
     <div class="panel" id="p-soru"></div>
   </div>
 </main>
-<footer>Gezegen konumları astronomy-engine (MIT lisansı) ile hesaplanır; Swiss Ephemeris ile karşılaştırılarak doğrulanmıştır. Sürüm 13 · İnternetsiz çalışır.</footer>
+<footer>Gezegen konumları astronomy-engine (MIT lisansı) ile hesaplanır; Swiss Ephemeris ile karşılaştırılarak doğrulanmıştır. Sürüm 14 · İnternetsiz çalışır.</footer>
 <div id="updBar" class="upd" hidden>Yeni sürüm hazır. <button type="button" class="btn" id="updBtn">Yenile</button></div>
 <script>/*
  MIT
@@ -692,6 +700,13 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     return Object.assign(r, { input: inp, utc: conv.utc, offsetMin: conv.offsetMin, offsetSource: conv.source });
   }
 
+  /* RAMC'den evler (kompozit harita için) */
+  function housesFromRamc(ramc, eps, lat, hsys) {
+    const { asc, mc } = angles(ramc, eps, lat); let cusps = null, h = hsys || 'placidus';
+    if (h === 'placidus') { cusps = placidus(ramc, eps, lat, asc, mc); if (!cusps) h = 'porphyry'; }
+    if (h === 'porphyry') cusps = porphyry(asc, mc); if (h === 'equal') cusps = equal(asc); if (h === 'whole') cusps = wholeSign(asc);
+    return { asc, mc, cusps, houseSystem: h };
+  }
   function ascFor(ramc, eps, lat) { return norm(atan2d(cosd(ramc), -(sind(ramc) * cosd(eps) + tand(lat) * sind(eps)))); }
   const TABLE_PTS = ['chiron', 'pholus', 'ceres', 'pallas', 'juno', 'vesta', 'truenode', 'lilith', 'selena', 'cupido', 'hades', 'zeus', 'kronos', 'apollon', 'admetos', 'vulkanus', 'poseidon', 'transpluto'];
   const DEF_PTS = ['chiron', 'ceres', 'pallas', 'juno', 'vesta'];
@@ -790,7 +805,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     return angDiff(bodyLon(BODY[id], t.AddDays(0.5)), bodyLon(BODY[id], t.AddDays(-0.5)));
   }
 
-  root.AstroCore = { computeChart, computeChartUtc, lonOf, latOf, speedOf, chartForDate, localToUtc, tzOffsetMinutes, norm, angDiff, houseOf, PLANETS };
+  root.AstroCore = { housesFromRamc, computeChart, computeChartUtc, lonOf, latOf, speedOf, chartForDate, localToUtc, tzOffsetMinutes, norm, angDiff, houseOf, PLANETS };
   if (typeof module !== 'undefined') module.exports = root.AstroCore;
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
@@ -2771,6 +2786,273 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
   root.AstroAsk = { render, build };
 })(window);
 </script>
+<script>/* "Harita Türleri" sekmesi: transit, progresyon, güneş yayı, üçlü, güneş/ay dönüşü, sinastri, kompozit, Davison, ayna (antiscia).
+   Global: AstroCharts */
+(function (root) {
+  const C = root.AstroCore, D = root.AstroData, A = root.AstroAnalysis, S = root.AstroSky, P = root.AstroProg;
+  const $ = s => document.querySelector(s);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const G = id => id === 'asc' ? 'AS' : id === 'mc' ? 'MC' : (D.PLANETS[id] ? D.PLANETS[id].g : id) + '︎';
+  const SG = i => D.SIGNS[i].g + '︎';
+  const PN = id => id === 'asc' ? 'Yükselen' : id === 'mc' ? 'MC' : D.PLANETS[id] ? D.PLANETS[id].tr : id;
+  const norm = C.norm, angDiff = C.angDiff, DAY = 86400000, YEAR = 365.2422 * DAY;
+  const LS = 'zayice_harita_turu_v1', LS_P = 'zayice_kayitlar_v1';
+  const MAJ = ['conj', 'sext', 'square', 'trine', 'opp'], MIN = ['semisext', 'semisq', 'sesqui', 'quincunx'];
+
+  const TYPES = [
+    ['transit', 'Transit', 'İç çember doğum haritası, dış çember seçtiğin tarihteki gökyüzü. Dış gezegenlerin doğum noktalarına yaptığı açılar o dönemin olaylarını anlatır.'],
+    ['prog', 'Progresyon', 'İkincil progresyon (bir gün = bir yıl). Dış çember seçtiğin tarihteki ilerletilmiş konumlar.'],
+    ['arc', 'Güneş yayı', 'Bütün noktalar, ilerletilmiş Güneş\'in katettiği yay kadar ileri taşınır.'],
+    ['triple', 'Üçlü harita', 'İçte doğum, ortada progresyon, dışta transit: üç tekniği tek çarkta görürsün.'],
+    ['sr', 'Güneş dönüşü', 'Güneş\'in doğum anındaki derecesine döndüğü anın haritası (tahvîl-i sâl). İçte dönüş haritası, dışta doğum haritası.'],
+    ['lr', 'Ay dönüşü', 'Ay\'ın doğum derecesine döndüğü anın haritası; o ayın havasını verir. İçte dönüş haritası, dışta doğum haritası.'],
+    ['syn', 'Sinastri', 'İki kişinin haritası üst üste: içte sen, dışta diğer kişi. Gezegenler arası açılar ilişkinin dinamiğini anlatır.'],
+    ['comp', 'Kompozit', 'İki haritanın orta noktalarından oluşan tek harita: ilişkinin kendisinin haritası.'],
+    ['dav', 'Davison', 'İki doğumun tam orta anı ve orta yerinin gerçek gökyüzü haritası: ilişkinin "doğum haritası".'],
+    ['anti', 'Ayna (antiscia)', 'Noktaların Yengeç–Oğlak eksenine göre yansıması (antiscia, dışta) ve karşı yansıması. Yansımanın bir doğum noktasına kavuşması gizli bir bağ sayılır.']
+  ];
+  let NATAL = null, ST = null;
+  function loadState() {
+    let o = null; try { o = JSON.parse(localStorage.getItem(LS) || 'null'); } catch (e) { }
+    return Object.assign({ type: 'transit', date: '', time: '', other: '', orb: 0, minor: false, place: 'res' }, o || {});
+  }
+  function saveState() { try { localStorage.setItem(LS, JSON.stringify({ type: ST.type, other: ST.other, orb: ST.orb, minor: ST.minor, place: ST.place })); } catch (e) { } }
+  const saved = () => { try { return JSON.parse(localStorage.getItem(LS_P) || '[]'); } catch (e) { return []; } };
+  function personInput(p, pts) {
+    const [y, mo, d] = p.date.split('-').map(Number), [h, mi] = p.time.split(':').map(Number);
+    return { name: p.name, year: y, month: mo, day: d, hour: h, minute: mi, lat: +p.lat, lon: +p.lon, tz: p.tz || 'Europe/Istanbul', manualOffset: p.off === '' || p.off == null ? null : +p.off, houseSystem: p.hs || 'placidus', city: p.city, points: pts };
+  }
+  const residence = inp => root.AstroSkyUI ? root.AstroSkyUI.residence(inp) : { name: inp.city, lat: inp.lat, lon: inp.lon, tz: inp.tz };
+  const pad = n => String(n).padStart(2, '0');
+  function localParts(ms, tz) {
+    const f = new Intl.DateTimeFormat('en-CA', { timeZone: tz, year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23' }).formatToParts(new Date(ms));
+    const g = t => f.find(x => x.type === t).value; return { date: `${g('year')}-${g('month')}-${g('day')}`, time: `${g('hour')}:${g('minute')}` };
+  }
+  const fDT = (ms, tz) => new Date(ms).toLocaleString('tr-TR', { timeZone: tz, day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+  /* ---------- hesap ---------- */
+  const ptsOf = ch => ch.planets.filter(p => p.id !== 'snode').map(p => ({ id: p.id, lon: p.lon, retro: p.retro }));
+  const withAngles = (pts, ch) => pts.concat([{ id: 'asc', lon: ch.asc }, { id: 'mc', lon: ch.mc }]);
+  function inter(a, b, orb, types, skipSame) {
+    const out = [], self = a === b;
+    a.forEach((x, i) => b.forEach((y, j) => {
+      if (self && j <= i) return;
+      if (skipSame && x.id === y.id) return;
+      const sep = Math.abs(angDiff(x.lon, y.lon));
+      types.forEach(t => {
+        const as = D.ASPECTS.find(q => q.id === t); const lim = as.major ? orb : Math.min(orb, 1.5) * (x.id.length && (D.PLANETS[x.id] || {}).ast ? .7 : 1);
+        const o = Math.abs(sep - as.angle); if (o <= lim) out.push({ a: x.id, b: y.id, type: t, orb: o });
+      });
+    }));
+    return out.sort((p, q) => p.orb - q.orb);
+  }
+  const mid = (a, b) => norm(a + angDiff(b, a) / 2);
+
+  function build(type, natal, t, other) {
+    const res = residence(natal.input), pts = natal.input.points, hs = natal.houseSystem;
+    const base = natal, natPts = ptsOf(natal);
+    const r = { base, rings: [], title: '', notes: [], pairs: [], tz: res.tz };
+    const asp = (A_, B_, orb, kind) => r.pairs.push({ list: inter(A_, B_, orb, MAJ.concat(ST.minor ? MIN : []), kind === 'anti'), kind });
+    if (type === 'transit') {
+      const tr = C.computeChartUtc(new Date(t), res.lat, res.lon, hs, pts);
+      r.rings = [{ pts: natPts, label: 'Doğum', cls: 'in' }, { pts: ptsOf(tr), label: 'Transit', cls: 'out' }];
+      r.title = `Transitler — ${fDT(t, res.tz)}`; asp(ptsOf(tr), withAngles(natPts, natal), ST.orb || 2, 'transit');
+    } else if (type === 'prog' || type === 'arc' || type === 'triple') {
+      const pc = P.progressedChart(natal, t);
+      let mv;
+      if (type === 'arc') { const arc = P.solarArc(natal, t); mv = withAngles(natPts, natal).map(p => ({ id: p.id, lon: norm(p.lon + arc) })); r.notes.push(`Güneş yayı: ${arc.toFixed(2).replace('.', ',')}°.`); }
+      else mv = pc.planets.map(p => ({ id: p.id, lon: p.lon, retro: p.retro })).concat([{ id: 'asc', lon: pc.asc }, { id: 'mc', lon: pc.mc }]);
+      const lbl = type === 'arc' ? 'Güneş yayı' : 'Progresyon';
+      r.rings = [{ pts: natPts, label: 'Doğum', cls: 'in' }, { pts: mv, label: lbl, cls: 'prg' }];
+      if (type === 'triple') { const tr = C.computeChartUtc(new Date(t), res.lat, res.lon, hs, pts); r.rings.push({ pts: ptsOf(tr), label: 'Transit', cls: 'out' }); asp(ptsOf(tr), withAngles(natPts, natal), ST.orb || 2, 'transit'); }
+      r.title = `${type === 'triple' ? 'Üçlü harita' : lbl} — ${fDT(t, res.tz)}`; asp(mv, withAngles(natPts, natal), ST.orb || 1, type === 'arc' ? 'arc' : 'prog');
+      r.notes.push(`Yaş: ${((t - natal.utc.getTime()) / YEAR).toFixed(1).replace('.', ',')}.`);
+    } else if (type === 'sr' || type === 'lr') {
+      const place = ST.place === 'birth' ? { lat: natal.input.lat, lon: natal.input.lon, name: natal.input.city || 'doğum yeri', tz: natal.input.tz } : res;
+      let rc, when;
+      if (type === 'sr') { const sr = S.solarReturn(natal, t, place.lat, place.lon, hs); when = sr.ms; rc = C.computeChartUtc(new Date(sr.ms), place.lat, place.lon, hs, pts); r.notes.push(`${sr.age} yaşının güneş dönüşü. Sonraki: ${fDT(sr.next, place.tz)}.`); }
+      else { const lrs = P.lunarReturns(natal, t - 29 * DAY, 3, place.lat, place.lon, hs).filter(x => x.t <= t); const l = lrs[lrs.length - 1] || P.lunarReturns(natal, t, 1, place.lat, place.lon, hs)[0]; when = l.t; rc = C.computeChartUtc(new Date(l.t), place.lat, place.lon, hs, pts); }
+      r.base = rc; r.rings = [{ pts: ptsOf(rc), label: type === 'sr' ? 'Güneş dönüşü' : 'Ay dönüşü', cls: 'in' }, { pts: natPts, label: 'Doğum', cls: 'out' }];
+      r.title = `${type === 'sr' ? 'Güneş dönüşü' : 'Ay dönüşü'} — ${fDT(when, place.tz)}, ${esc(place.name)}`;
+      r.notes.push(`Dönüş haritasının yükseleni ${D.SIGNS[A.signIdx(rc.asc)].tr}, MC ${D.SIGNS[A.signIdx(rc.mc)].tr}. ${type === 'sr' ? 'Güneş' : 'Ay'} dönüş haritasının ${rc.planets[type === 'sr' ? 0 : 1].house}. evinde: yılın/ayın ana konusu bu evin alanıdır.`);
+      { const L = withAngles(ptsOf(rc), rc); asp(L, L, ST.orb || 3, 'self'); }
+    } else if (type === 'syn' || type === 'comp' || type === 'dav') {
+      if (!other) { r.need = true; return r; }
+      const ob = C.computeChart(personInput(other, pts)), obPts = ptsOf(ob);
+      if (type === 'syn') {
+        r.rings = [{ pts: natPts, label: natal.input.name || 'Sen', cls: 'in' }, { pts: withAngles(obPts, ob), label: other.name, cls: 'out' }];
+        r.title = `Sinastri — ${esc(natal.input.name || 'Sen')} ve ${esc(other.name)}`; r.notes.push(`Dış çemberdeki gezegenler iç haritanın (${esc(natal.input.name || 'senin haritan')}) evlerine göre yerleştirildi.`);
+        asp(withAngles(natPts, natal), withAngles(obPts, ob), ST.orb || 5, 'syn');
+      } else if (type === 'comp') {
+        const ids = natPts.map(p => p.id).filter(id => obPts.some(q => q.id === id));
+        const cp = ids.map(id => ({ id, lon: mid(natPts.find(p => p.id === id).lon, obPts.find(p => p.id === id).lon) }));
+        const mc = mid(natal.mc, ob.mc), eps = natal.eps, ramc = norm(Math.atan2(Math.sin(mc * Math.PI / 180) * Math.cos(eps * Math.PI / 180), Math.cos(mc * Math.PI / 180)) * 180 / Math.PI);
+        const hh = C.housesFromRamc(ramc, eps, (natal.input.lat + ob.input.lat) / 2, hs);
+        const bc = { asc: hh.asc, mc: hh.mc, cusps: hh.cusps };
+        r.base = bc; r.rings = [{ pts: cp, label: 'Kompozit', cls: 'in' }];
+        r.title = `Kompozit — ${esc(natal.input.name || 'Sen')} ve ${esc(other.name)}`; r.notes.push('Evler, iki MC\'nin orta noktası ve iki doğum yerinin ortalama enlemiyle hesaplandı (orta nokta yöntemi).');
+        { const L = withAngles(cp, bc); asp(L, L, ST.orb || 3, 'self'); }
+      } else {
+        const tm = (natal.utc.getTime() + ob.utc.getTime()) / 2, la = (natal.input.lat + ob.input.lat) / 2, lo = mid(natal.input.lon, ob.input.lon) > 180 ? mid(natal.input.lon, ob.input.lon) - 360 : mid(natal.input.lon, ob.input.lon);
+        const dc = C.computeChartUtc(new Date(tm), la, lo, hs, pts);
+        r.base = dc; r.rings = [{ pts: ptsOf(dc), label: 'Davison', cls: 'in' }];
+        r.title = `Davison — ${esc(natal.input.name || 'Sen')} ve ${esc(other.name)}`;
+        r.notes.push(`Orta an: ${new Date(tm).toISOString().slice(0, 16).replace('T', ' ')} (UTC); orta yer: ${la.toFixed(2)}°, ${lo.toFixed(2)}°.`);
+        { const L = withAngles(ptsOf(dc), dc); asp(L, L, ST.orb || 3, 'self'); }
+      }
+    } else if (type === 'anti') {
+      const an = withAngles(natPts, natal).map(p => ({ id: p.id, lon: norm(180 - p.lon) })), ca = an.map(p => ({ id: p.id, lon: norm(p.lon + 180) }));
+      r.rings = [{ pts: natPts, label: 'Doğum', cls: 'in' }, { pts: an, label: 'Antiscia', cls: 'out' }];
+      r.title = 'Ayna haritası (antiscia)';
+      r.pairs.push({ list: inter(an, withAngles(natPts, natal), ST.orb || 1.5, ['conj'], true), kind: 'anti' });
+      r.pairs.push({ list: inter(ca, withAngles(natPts, natal), ST.orb || 1.5, ['conj'], true), kind: 'contra' });
+      r.extra = ca;
+    }
+    return r;
+  }
+
+  /* ---------- çizim ---------- */
+  function spread(ps, sep) {
+    const n = ps.length; if (n < 2) { ps.forEach(p => p.d = p.lon); return; }
+    if (n * sep > 340) sep = 340 / n;
+    const sorted = ps.slice().sort((a, b) => a.lon - b.lon);
+    let bi = 0, bg = -1; for (let i = 0; i < n; i++) { const g = norm(sorted[(i + 1) % n].lon - sorted[i].lon); if (g > bg) { bg = g; bi = i; } }
+    const st = sorted[(bi + 1) % n].lon, arr = sorted.map((_, k) => sorted[(bi + 1 + k) % n]).map(p => ({ p, x: norm(p.lon - st) }));
+    let gr = arr.map(a => ({ it: [a] })); const lay = g => { const w = (g.it.length - 1) * sep, m = g.it.reduce((s, a) => s + a.x, 0) / g.it.length; g.a = m - w / 2; g.b = m + w / 2; };
+    gr.forEach(lay);
+    for (let k = 0; k < 300; k++) { let mg = false; for (let i = 0; i + 1 < gr.length; i++) if (gr[i + 1].a - gr[i].b < sep) { gr[i].it = gr[i].it.concat(gr[i + 1].it); gr.splice(i + 1, 1); lay(gr[i]); mg = true; break; } if (!mg) break; }
+    gr.forEach(g => g.it.forEach((a, k) => { a.p.d = norm(st + g.a + k * sep); }));
+  }
+  function wheel(r) {
+    const b = r.base, Sz = 540, c = Sz / 2, R1 = 262, R2 = 234, n = r.rings.length;
+    const bands = n === 1 ? [[234, 184]] : n === 2 ? [[234, 196], [196, 156]] : [[234, 206], [206, 176], [176, 146]];
+    const Rin = bands[bands.length - 1][1] - 2, Rh = Rin - 46;
+    const ang = l => (180 + (l - b.asc)) * Math.PI / 180, xy = (l, rr) => [c + rr * Math.cos(ang(l)), c - rr * Math.sin(ang(l))];
+    let s = `<svg viewBox="0 0 ${Sz} ${Sz}" class="wheel mw" role="img" aria-label="${esc(r.title)}">`;
+    const EL = ['#f6e0d2', '#e7ecd5', '#e2e8f3', '#dfe9e6'];
+    for (let i = 0; i < 12; i++) {
+      const a0 = i * 30, a1 = a0 + 30, [x0, y0] = xy(a0, R1), [x1, y1] = xy(a1, R1), [x2, y2] = xy(a1, R2), [x3, y3] = xy(a0, R2);
+      s += `<path d="M${x0},${y0} A${R1},${R1} 0 0 0 ${x1},${y1} L${x2},${y2} A${R2},${R2} 0 0 1 ${x3},${y3} Z" fill="${EL[i % 4]}" stroke="#c9bd9b" stroke-width=".7"/>`;
+      const [gx, gy] = xy(a0 + 15, (R1 + R2) / 2); s += `<text x="${gx}" y="${gy}" class="sg">${SG(i)}</text>`;
+    }
+    bands.forEach(([o, i], k) => { s += `<circle cx="${c}" cy="${c}" r="${o}" fill="${k % 2 ? '#fbf8f1' : '#fff'}" stroke="#c9bd9b" stroke-width=".7"/>`; });
+    s += `<circle cx="${c}" cy="${c}" r="${Rin}" fill="#fffdf6" stroke="#b9a984"/><circle cx="${c}" cy="${c}" r="${Rh}" fill="#fff" stroke="#d8ccae"/>`;
+    b.cusps.forEach((cu, i) => {
+      const axis = [0, 3, 6, 9].includes(i), [x0, y0] = xy(cu, R2), [x1, y1] = xy(cu, axis ? Rh - 4 : Rh);
+      s += `<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1}" stroke="${axis ? '#26386a' : '#d3c7a6'}" stroke-width="${axis ? 1.4 : .6}"/>`;
+      const nx = b.cusps[(i + 1) % 12], m = norm(cu + angDiff(nx, cu) / 2), [hx, hy] = xy(m, Rh + 12); s += `<text x="${hx}" y="${hy}" class="hn">${i + 1}</text>`;
+    });
+    [['AS', b.asc], ['MC', b.mc]].forEach(([t, l]) => { const [x, y] = xy(l, R2 + 0); s += `<circle cx="${x}" cy="${y}" r="2.5" fill="#26386a"/>`; });
+    // açı çizgileri (ilk açı listesi)
+    const pr = r.pairs[0];
+    if (pr && !['anti', 'contra'].includes(pr.kind)) {
+      const last = r.rings.length - 1, [ia, ib] = { self: [0, 0], transit: [last, 0], prog: [1, 0], arc: [1, 0], syn: [0, 1] }[pr.kind] || [0, 0];
+      const lonFor = (k, id) => { const p = r.rings[k] && r.rings[k].pts.find(q => q.id === id); if (p) return p.lon; if (k === 0 && id === 'asc') return b.asc; if (k === 0 && id === 'mc') return b.mc; return null; };
+      pr.list.filter(x => x.type !== 'conj').slice(0, 45).forEach(x => {
+        const la = lonFor(ia, x.a), lb = lonFor(ib, x.b); if (la == null || lb == null) return;
+        const as = D.ASPECTS.find(q => q.id === x.type), [x0, y0] = xy(la, Rh - 2), [x1, y1] = xy(lb, Rh - 2);
+        s += `<line x1="${x0}" y1="${y0}" x2="${x1}" y2="${y1}" stroke="${as.color}" stroke-width="${x.orb < 1 ? 1.3 : .7}" ${as.major ? '' : 'stroke-dasharray="3 3"'} opacity=".75"/>`;
+      });
+    }
+    r.rings.forEach((rg, k) => {
+      const [o, i] = bands[n - 1 - k], rm = (o + i) / 2, list = rg.pts.map(p => ({ ...p }));
+      spread(list, n === 1 ? 6.5 : 5.5);
+      list.forEach(p => {
+        const [lx, ly] = xy(p.lon, i), [kx, ky] = xy(p.d, i + 4), [x, y] = xy(p.d, rm);
+        s += `<line x1="${lx}" y1="${ly}" x2="${kx}" y2="${ky}" stroke="#8b7d5d" stroke-width=".5"/>`;
+        const lbl = (D.PLANETS[p.id] && D.PLANETS[p.id].g.length > 1 && !/[☀-⛿]/.test(D.PLANETS[p.id].g)) || ['asc', 'mc'].includes(p.id);
+        s += `<text x="${x}" y="${y}" class="pg r-${rg.cls}${lbl ? ' lbl' : ''}">${G(p.id)}</text>`;
+      });
+    });
+    return s + '</svg>';
+  }
+
+  /* ---------- metin ---------- */
+  const VERB = { transit: ['Transit', 'doğum'], prog: ['İlerletilmiş', 'doğum'], arc: ['Yönlendirilmiş', 'doğum'], syn: ['', ''], self: ['', ''], anti: ['', ''], contra: ['', ''] };
+  function pairLine(x, kind, names) {
+    const as = D.ASPECTS.find(q => q.id === x.type), sh = id => id === 'asc' ? 'kişilik ve beden' : id === 'mc' ? 'kariyer ve toplumsal konum' : D.PLANETS[id] ? D.PLANETS[id].short : '';
+    let head;
+    if (kind === 'syn') head = `${esc(names[0])}: ${G(x.a)} ${PN(x.a)} <span style="color:${as.color}">${as.g}</span> ${esc(names[1])}: ${G(x.b)} ${PN(x.b)}`;
+    else if (kind === 'anti' || kind === 'contra') head = `${G(x.a)} ${PN(x.a)} ${kind === 'anti' ? 'yansıması' : 'karşı yansıması'} <span style="color:${as.color}">${as.g}</span> ${G(x.b)} ${PN(x.b)}`;
+    else if (kind === 'self') head = `${G(x.a)} ${PN(x.a)} <span style="color:${as.color}">${as.g}</span> ${G(x.b)} ${PN(x.b)}`;
+    else head = `${VERB[kind][0]} ${G(x.a)} ${PN(x.a)} <span style="color:${as.color}">${as.g}</span> ${VERB[kind][1]} ${G(x.b)} ${PN(x.b)}`;
+    const body = kind === 'anti' || kind === 'contra' ? `${PN(x.a)} (${sh(x.a)}) ile ${PN(x.b)} (${sh(x.b)}) arasında ${kind === 'anti' ? 'gizli, kendiliğinden işleyen bir bağ' : 'zorlayıcı, gizli bir gerilim'} sayılır.`
+      : `${PN(x.a)} (${sh(x.a)}) ile ${PN(x.b)} (${sh(x.b)}) ${as.tr.replace(/ \(.*\)/, '').toLocaleLowerCase('tr')} açısında: ${as.short || ''}`;
+    return `<div class="item avoid"><h3>${head} <span class="muted small">(${x.orb.toFixed(2).replace('.', ',')}°)</span></h3><p>${esc(body)}</p></div>`;
+  }
+  function table(r) {
+    const b = r.base, cols = r.rings.map(rg => rg.label);
+    const ids = []; r.rings.forEach(rg => rg.pts.forEach(p => { if (!ids.includes(p.id)) ids.push(p.id); }));
+    const cell = (rg, id) => { const p = rg.pts.find(q => q.id === id); if (!p) return '<td></td>'; return `<td>${SG(A.signIdx(p.lon))} ${A.fmtDeg(p.lon)}${p.retro && !['node', 'truenode'].includes(id) ? ' <small class="neg">R</small>' : ''} <small class="muted">${C.houseOf(p.lon, b.cusps)}. ev</small></td>`; };
+    return `<div class="gridwrap"><table class="t"><thead><tr><th>Nokta</th>${cols.map(c => `<th>${esc(c)}</th>`).join('')}</tr></thead><tbody>
+      ${ids.map(id => `<tr><td>${['asc', 'mc'].includes(id) ? '' : G(id) + ' '}${PN(id)}</td>${r.rings.map(rg => cell(rg, id)).join('')}</tr>`).join('')}
+      <tr><td>Ev başları</td><td colspan="${cols.length}"><small>${b.cusps.map((c, i) => `${i + 1}: ${SG(A.signIdx(c))} ${A.fmtDeg(c, false)}`).join(' · ')}</small></td></tr></tbody></table></div>`;
+  }
+
+  /* ---------- arayüz ---------- */
+  function controls() {
+    const ty = ST.type, needDate = !['syn', 'comp', 'dav', 'anti'].includes(ty), needOther = ['syn', 'comp', 'dav'].includes(ty), list = saved();
+    const orbDefault = { transit: 2, prog: 1, arc: 1, triple: 1, sr: 3, lr: 3, syn: 5, comp: 3, dav: 3, anti: 1.5 }[ty];
+    return `<div class="ctype">${TYPES.map(([id, t]) => `<button type="button" class="tab${id === ty ? ' on' : ''}" data-ct="${id}">${t}</button>`).join('')}</div>
+      <p class="muted small" style="margin-top:8px">${esc(TYPES.find(x => x[0] === ty)[2])}</p>
+      <div class="cform">
+        ${needDate ? `<label>Tarih<input type="date" id="ctDate" value="${ST.date}"></label><label>Saat<input type="time" id="ctTime" value="${ST.time}"></label>
+          <div class="cstep"><button type="button" class="btn sec" data-step="-365">−1 yıl</button><button type="button" class="btn sec" data-step="-30">−1 ay</button><button type="button" class="btn sec" data-step="-1">−1 gün</button><button type="button" class="btn sec" data-step="now">Şimdi</button><button type="button" class="btn sec" data-step="1">+1 gün</button><button type="button" class="btn sec" data-step="30">+1 ay</button><button type="button" class="btn sec" data-step="365">+1 yıl</button></div>` : ''}
+        ${['sr', 'lr'].includes(ty) ? `<label>Yer<select id="ctPlace"><option value="res" ${ST.place === 'res' ? 'selected' : ''}>Yaşadığın şehir</option><option value="birth" ${ST.place === 'birth' ? 'selected' : ''}>Doğum yeri</option></select></label>` : ''}
+        ${needOther ? `<label>Diğer kişi<select id="ctOther"><option value="">Kayıtlı kişilerden seç…</option>${list.map(p => `<option value="${esc(p.name)}" ${p.name === ST.other ? 'selected' : ''}>${esc(p.name)}</option>`).join('')}</select></label>` : ''}
+        <label>Tolerans<select id="ctOrb">${[0.5, 1, 1.5, 2, 3, 4, 5, 6, 8].map(v => `<option value="${v}" ${(ST.orb || orbDefault) === v ? 'selected' : ''}>${String(v).replace('.', ',')}°</option>`).join('')}</select></label>
+        <label class="cb" style="align-self:end"><input type="checkbox" id="ctMinor" ${ST.minor ? 'checked' : ''}> Minör açılar</label>
+      </div>`;
+  }
+  function draw() {
+    const el = $('#p-haritalar'); if (!el || !NATAL) return;
+    const res = residence(NATAL.input);
+    if (!ST.date) { const lp = localParts(Date.now(), res.tz); ST.date = lp.date; ST.time = lp.time; }
+    const [y, mo, d] = ST.date.split('-').map(Number), [h, mi] = (ST.time || '12:00').split(':').map(Number);
+    const t = C.localToUtc(y, mo, d, h, mi, res.tz, null).utc.getTime();
+    const other = saved().find(p => p.name === ST.other) || null;
+    let r, err = '';
+    try { r = build(ST.type, NATAL, t, other); } catch (e) { console.error(e); err = e.message; }
+    let body = '';
+    if (err) body = `<p class="msg err">Hesaplanamadı: ${esc(err)}</p>`;
+    else if (r.need) body = `<p>Bu harita iki kişi ister. Yukarıdaki "Diğer kişi" listesinden birini seç. Listede yalnızca <b>Bu kişiyi kaydet</b> ile kaydettiğin kişiler görünür.</p>`;
+    else {
+      const names = [NATAL.input.name || 'Sen', ST.other];
+      const sec = (p, ttl) => `<section class="card"><h2>${ttl} <small class="muted">(${p.list.length})</small></h2>${p.list.length ? p.list.map(x => pairLine(x, p.kind, names)).join('') : '<p>Bu toleransla açı yok.</p>'}<p class="muted small">Açıklamalar genel anlamlardır; tam isabete (0°) yakın olanlar daha güçlü sayılır.</p></section>`;
+      const ttl = { transit: 'Transit açıları', prog: 'Progresyon açıları', arc: 'Güneş yayı açıları', syn: 'Sinastri açıları', self: 'Haritanın kendi açıları', anti: 'Yansıma kavuşumları (antiscia)', contra: 'Karşı yansıma kavuşumları' };
+      body = `<section class="card"><h2>${r.title}</h2><div class="two"><div>${wheel(r)}<p class="muted small" style="text-align:center">${r.rings.map((rg, k) => `<span class="lg r-${rg.cls}">●</span> ${esc(rg.label)}${k === 0 && r.rings.length > 1 ? ' (iç)' : k === r.rings.length - 1 && r.rings.length > 1 ? ' (dış)' : ''}`).join(' · ')}</p></div>
+        <div>${r.notes.map(n => `<p>${n}</p>`).join('')}${table(r)}</div></div></section>
+        ${r.pairs.map(p => sec(p, ttl[p.kind])).join('')}`;
+    }
+    el.innerHTML = `<section class="card"><h2>Harita Türleri</h2>${controls()}</section>${body}`;
+    bind();
+  }
+  function bind() {
+    const el = $('#p-haritalar');
+    el.querySelectorAll('[data-ct]').forEach(b => b.addEventListener('click', () => { ST.type = b.dataset.ct; ST.orb = 0; saveState(); draw(); }));
+    const on = (id, ev, f) => { const x = el.querySelector(id); if (x) x.addEventListener(ev, f); };
+    on('#ctDate', 'change', e => { ST.date = e.target.value; draw(); });
+    on('#ctTime', 'change', e => { ST.time = e.target.value; draw(); });
+    on('#ctPlace', 'change', e => { ST.place = e.target.value; saveState(); draw(); });
+    on('#ctOther', 'change', e => { ST.other = e.target.value; saveState(); draw(); });
+    on('#ctOrb', 'change', e => { ST.orb = +e.target.value; saveState(); draw(); });
+    on('#ctMinor', 'change', e => { ST.minor = e.target.checked; saveState(); draw(); });
+    el.querySelectorAll('[data-step]').forEach(b => b.addEventListener('click', () => {
+      const res = residence(NATAL.input);
+      if (b.dataset.step === 'now') { const lp = localParts(Date.now(), res.tz); ST.date = lp.date; ST.time = lp.time; }
+      else { const [y, mo, d] = ST.date.split('-').map(Number), n = +b.dataset.step, dt = new Date(Date.UTC(y, mo - 1, d)); if (Math.abs(n) === 365) dt.setUTCFullYear(dt.getUTCFullYear() + Math.sign(n)); else if (Math.abs(n) === 30) dt.setUTCMonth(dt.getUTCMonth() + Math.sign(n)); else dt.setUTCDate(dt.getUTCDate() + n); ST.date = dt.toISOString().slice(0, 10); }
+      draw();
+    }));
+  }
+  function render(ch) {
+    NATAL = ch; if (!ST) ST = loadState();
+    const el = $('#p-haritalar'); if (!el) return;
+    if (el.classList.contains('on')) draw(); else el.dataset.dirty = '1';
+  }
+  document.addEventListener('click', e => { const t = e.target.closest && e.target.closest('.tab[data-tab="haritalar"]'); if (t) setTimeout(() => { const el = $('#p-haritalar'); if (el && (el.dataset.dirty || !el.innerHTML)) { delete el.dataset.dirty; draw(); } }, 0); });
+  root.AstroCharts = { render, draw, build, inter };
+})(window);
+</script>
 <script>/* "Saatlerin Hazinesi" için kişisel kitap bağlantısı. Global: AstroBook
    Kitabın metni uygulamada YOKTUR (1973 Selahaddin Alpay çevirisi telifli). Kullanıcı kendi PDF'ini bir kez seçer;
    dosya yalnızca bu tarayıcının yerel deposunda (IndexedDB) kalır, hiçbir yere gönderilmez. Uygulama sadece ilgili sayfayı açar.
@@ -2969,6 +3251,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     try { X = window.AstroSkyUI.render(ch, W, Z, Date.now()); } catch (e) { console.error(e); msg('Göksel olaylar bölümü hesaplanırken hata: ' + e.message, true); }
     try { const pr = window.AstroProgUI.render(ch, Date.now(), window.AstroSkyUI.residence(ch.input)); if (X) X.prog = pr; } catch (e) { console.error(e); msg('İlerletim bölümü hesaplanırken hata: ' + e.message, true); }
     renderCompare(ch, W, Z, K, X);
+    try { window.AstroCharts.render(ch); } catch (e) { console.error(e); msg('Harita türleri hazırlanırken hata: ' + e.message, true); }
     try { window.AstroAsk.render(ch, W, Z); } catch (e) { console.error(e); msg('Soru sekmesi hazırlanırken hata: ' + e.message, true); }
     $('#printHead').innerHTML = header(ch);
     const PREV = CUR; CUR = snap();
@@ -2999,6 +3282,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       <section class="card avoid"><h2>Bölümler</h2>
         <ul class="toc">
           <li><b>Batı Haritası</b> — modern astrolojinin dairesel haritası, gezegen konumları, açılar ve yorumlar.</li>
+          <li><b>Harita Türleri</b> — transit, progresyon, güneş yayı, üçlü harita, güneş ve ay dönüşü, sinastri, kompozit, Davison ve ayna (antiscia) haritaları; tarih ileri geri alınabilir.</li>
           <li><b>Zâyiçe</b> — Osmanlı/İslam dünyasının klasik ilm-i ahkâm-ı nücûm geleneği: yedi seyyâre, makamlar, sa'd-nahs, talih noktası, Ay menzili, fardâr dönemleri.</li>
           <li><b>Bugünkü Gökyüzü</b> — şu anki gezegenler, Ay'ın evresi ve menzili, sana etki eden transitler, bugünün gezegen saatleri ve Saatlerin Hazinesi kitabına sayfa bağlantıları.</li>
           <li><b>Takvim</b> — önümüzdeki 12 ayın tutulmaları, Yeni Ay ve Dolunayları, burç değişimleri, retro dönemleri ve yaklaşan transitler.</li>
