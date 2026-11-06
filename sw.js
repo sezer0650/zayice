@@ -1,5 +1,5 @@
 /* Zâyiçe servis çalışanı: internetsiz çalışma ve güncelleme */
-const CACHE = 'zayice-45fb5af9a5';
+const CACHE = 'zayice-5e8c19622f';
 const FILES = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(FILES.map(f => new Request(f, { cache: 'reload' })))));

@@ -64,6 +64,7 @@ td.pos{color:var(--pos)}td.neg{color:var(--neg)}
 html.pvopen,html.pvopen body{overflow:hidden}
 .libbtn{display:inline-block;margin:2px 4px 2px 0;padding:4px 9px;border:1px solid var(--line);border-radius:14px;background:#faf8f3;color:var(--ink);font-size:13px;cursor:pointer;white-space:nowrap}.libbtn small{color:#8a7f66}
 .libt td:first-child{width:42%;font-size:14px}.libtoc{line-height:1.9;margin:6px 0 4px;font-size:14px}
+@media (min-width:821px){.tabs{flex-wrap:wrap!important;overflow:visible!important;row-gap:6px}}
 .toc{margin:0;padding-left:20px}
 .bar{display:grid;grid-template-columns:80px 1fr 30px;align-items:center;gap:8px;font-size:14px;margin:3px 0}
 .bar i{display:block;height:10px;background:var(--gold);border-radius:5px;max-width:100%}
@@ -311,7 +312,7 @@ details.leo>p{padding:0 6px}
     <div class="panel" id="p-kitaplik"></div>
   </div>
 </main>
-<footer>Gezegen konumları astronomy-engine (MIT lisansı) ile hesaplanır; Swiss Ephemeris ile karşılaştırılarak doğrulanmıştır. Sürüm 26 · İnternetsiz çalışır.</footer>
+<footer>Gezegen konumları astronomy-engine (MIT lisansı) ile hesaplanır; Swiss Ephemeris ile karşılaştırılarak doğrulanmıştır. Sürüm 27 · İnternetsiz çalışır.</footer>
 <div id="updBar" class="upd" hidden>Yeni sürüm hazır. <button type="button" class="btn" id="updBtn">Yenile</button></div>
 <script>/*
  MIT
@@ -4834,6 +4835,7 @@ window.AstroLibIdx = [{"id":"celik1994","title":"Astroloji El Kitabı","author":
     });
     document.querySelectorAll('.tab').forEach(b => b.addEventListener('click', () => { if (b.classList.contains('on')) return; showTab(b.dataset.tab); push({ p: CUR, tab: b.dataset.tab }); const top = $('#results').getBoundingClientRect().top + window.scrollY; if (window.scrollY > top) window.scrollTo(0, top); }));
     bindSwipe();
+    const tb = document.querySelector('.tabs'); if (tb) tb.addEventListener('wheel', e => { if (tb.scrollWidth > tb.clientWidth && Math.abs(e.deltaY) > Math.abs(e.deltaX)) { tb.scrollLeft += e.deltaY; e.preventDefault(); } }, { passive: false });
     renderSaved();
     $('#switchSel').addEventListener('change', e => {
       const v = e.target.value; e.target.value = '';
