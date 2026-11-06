@@ -223,6 +223,7 @@ details.leo.cur>summary{background:#fbf1d6}
 details.leo>p{padding:0 6px}
 #p-soru textarea{width:100%;min-height:90px;resize:vertical}
 #askOut{font:12.5px/1.5 ui-monospace,"Cascadia Mono",Consolas,Menlo,monospace;min-height:260px}
+.askstyle{margin:14px 0 0}.askstyle select{width:auto;max-width:100%;margin:6px 0 8px}#askInstr{font-size:14px;line-height:1.5;min-height:220px}
 .askopts{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px 18px;margin:14px 0 6px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:#faf8f3}
 .askopts label{display:flex;align-items:center;justify-content:flex-start;gap:10px;text-align:left;color:var(--ink);font-size:14.5px;font-weight:400;cursor:pointer;margin:0;min-width:0}
 .askopts label span{white-space:normal}
@@ -276,7 +277,7 @@ details.leo>p{padding:0 6px}
     <div id="printHead"></div>
     <nav class="tabs">
       <button class="tab on" data-tab="ozet">Özet</button>
-      <button class="tab" data-tab="bati">Batı Haritası</button>
+      <button class="tab" data-tab="bati">Natal Harita</button>
       <button class="tab" data-tab="haritalar">Harita Türleri</button>
       <button class="tab" data-tab="zayice">Zâyiçe</button>
       <button class="tab" data-tab="gokyuzu">Bugünkü Gökyüzü</button>
@@ -298,7 +299,7 @@ details.leo>p{padding:0 6px}
     <div class="panel" id="p-soru"></div>
   </div>
 </main>
-<footer>Gezegen konumları astronomy-engine (MIT lisansı) ile hesaplanır; Swiss Ephemeris ile karşılaştırılarak doğrulanmıştır. Sürüm 20 · İnternetsiz çalışır.</footer>
+<footer>Gezegen konumları astronomy-engine (MIT lisansı) ile hesaplanır; Swiss Ephemeris ile karşılaştırılarak doğrulanmıştır. Sürüm 21 · İnternetsiz çalışır.</footer>
 <div id="updBar" class="upd" hidden>Yeni sürüm hazır. <button type="button" class="btn" id="updBtn">Yenile</button></div>
 <script>/*
  MIT
@@ -3905,6 +3906,27 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
   const DG = { dom: 'kendi burcunda (beyt)', exalt: 'şerefinde', trip: 'müsellesinde', term: 'kendi haddinde', face: 'kendi vechinde', det: 'vebalinde (zarar)', fall: 'hubûtunda (düşüş)', peregrine: 'garîb (itibarsız)' };
   const LOTN = { fortune: 'Sehm-i Saâdet (Şans)', spirit: 'Sehm-i Gayb (Ruh)', eros: 'Aşk', necessity: 'Zaruret', courage: 'Cesaret', victory: 'Zafer', nemesis: 'Nemesis (düşman/sıkıntı)', death: 'Ölüm' };
   const HS = { placidus: 'Placidus', porphyry: 'Porphyry', equal: 'Eşit ev', whole: 'Tam burç' };
+
+  /* Yorum tarzları: kullanıcı seçer ya da kendi talimatını yazar; seçim bu tarayıcıda saklanır */
+  const LS_STYLE = 'zayice-ask-style';
+  const STYLES = {
+    sentez: { ad: 'Astrolog sentezi (önerilen)', text: [
+      'Klasik (Helenistik ve İslâmî ilm-i nücûm) ile modern astrolojiyi birlikte bilen deneyimli bir astrolog gibi yorumla. Amacın verileri tek tek sıralamak değil, bir insan hayatı hikâyesi gibi birleştirmek (sentez).',
+      'Yöntem:',
+      '1. Önce haritanın ana çerçevesini kur: gündüz/gece haritası, yükselen ve yükselenin efendisi (bulunduğu ev, burç, itibarı), Güneş ve Ay, en güçlü ve en zayıf gezegenler, açıların genel deseni (uyumlu mu gergin mi, hangi gezegenler öne çıkıyor).',
+      '2. Bir yargıya varmak için en az iki ayrı göstergenin aynı yönü işaret etmesini ara (tanıklık ilkesi). Çelişen göstergeleri saklama; ikisini tart ve hangisinin neden ağır bastığını söyle.',
+      '3. Yorumu somut hayata bağla: kişinin karakteri, iş ve meslek, para, ilişkiler ve evlilik, aile, sağlığa genel dikkat, iç dünyası. Soyut burç cümleleri yerine "bu kişi gündelik hayatta şöyle davranır, şuna zorlanır, şurada parlar" diye anlat.',
+      '4. Zamanlamada katmanları birlikte değerlendir: yıllık intihâ (profeksiyon) ve yılın efendisi, fardar dönemi, ilerletimler, güneş yayı ve transitler. Birden çok katman aynı konuyu aynı dönemde işaret ediyorsa bunu öne çıkar; tek başına bir transiti abartma.',
+      '5. Kaderci olma: zor bir göstergeyi "olacak" diye değil, "şu dönemde şu konuda zorlanma eğilimi; şöyle hazırlanılabilir" diye anlat. Sağlık, hukuk ve para konularında kesin hüküm verme; gerekirse uzmana yönlendir.',
+      '6. Sonunda pratik öneriler ver: neye dikkat etmeli, hangi dönem neye uygun.',
+      'Cevap düzeni: Kısa özet (3–4 cümle) → Haritanın ana teması → Soruyla ilgili göstergeler ve tartılmaları → Zamanlama (tarihlerle) → Pratik öneriler → Belirsiz kalan noktalar.'
+    ].join('\n') },
+    sade: { ad: 'Kısa ve sade', text: 'Astroloji terimlerini en aza indirerek, sade ve anlaşılır bir dille yorumla. Önce soruya doğrudan cevap ver (birkaç cümle), sonra bu cevabın dayandığı en önemli 3–5 göstergeyi kısaca açıkla, en sonda önemli tarihleri ve pratik önerileri madde madde yaz. Kaderci olma; sağlık, hukuk ve para konularında kesin hüküm verme.' },
+    klasik: { ad: 'Geleneksel (ilm-i nücûm)', text: 'Yalnızca geleneksel (Helenistik, Arap-İslâm ve Ortaçağ) astroloji yöntemleriyle yorumla: yedi gezegen, itibarlar (beyt, şeref, müselles, had, vech), gündüz/gece mezhebi, sehimler, intihâ, fardar ve güneş dönüşü. Uranüs, Neptün ve Plüton\'u ancak yardımcı bilgi olarak an. Klasik yazarların (Ptolemaios, Dorotheos, Ebu Ma\'şer, Bîrûnî, Bonatti, Lilly) yaklaşımına göre değerlendir ve hangi kurala dayandığını belirt. Kaderci hükümleri bugünün diline uygun biçimde eğilim olarak anlat.' }
+  };
+  function styleState() { let o = null; try { o = JSON.parse(localStorage.getItem(LS_STYLE) || 'null'); } catch (e) { } return o && o.mode ? o : { mode: 'sentez', custom: '' }; }
+  function saveStyle(o) { try { localStorage.setItem(LS_STYLE, JSON.stringify(o)); } catch (e) { } }
+  function instrText(st) { return st.mode === 'ozel' ? (st.custom || '') : STYLES[st.mode] ? STYLES[st.mode].text : STYLES.sentez.text; }
   let TZ = 'Europe/Istanbul', DATA = null;
   const fD = ms => new Date(ms).toLocaleDateString('tr-TR', { timeZone: TZ, day: 'numeric', month: 'long', year: 'numeric' });
   const deg = lon => A.fmtDeg(lon);
@@ -4020,7 +4042,8 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     const { ch, W, Z } = DATA, nowMs = Date.now(), i = ch.input;
     const parts = [
       'Aşağıda kendi doğum haritamın, "Zâyiçe" adlı astroloji uygulamasının hesapladığı verileri var. Konumlar hassas efemeris hesabıdır (Swiss Ephemeris ile karşılaştırılıp doğrulanmıştır); lütfen konumları yeniden hesaplamaya çalışma, bu değerleri kullan.',
-      'Cevap verirken: (1) hangi verilere dayandığını açıkça belirt; (2) aşağıda klasik kaynaklardan alıntı (Alan Leo vb.) varsa, kaynağın söylediği ile senin modern yorumunu ayrı tut; (3) veride olmayan bir konumu ya da açıyı uydurma; (4) emin olmadığın yerde bunu söyle. Cevabı Türkçe ver.',
+      '## NASIL YORUMLAMALISIN\n' + (o.instr && o.instr.trim() ? o.instr.trim() : STYLES.sentez.text),
+      'Değişmez kurallar: (1) hangi verilere dayandığını açıkça belirt; (2) aşağıda klasik kaynaklardan alıntı (Alan Leo vb.) varsa, kaynağın söylediği ile senin yorumunu ayrı tut; (3) veride olmayan bir konumu ya da açıyı uydurma; (4) emin olmadığın yerde bunu söyle. Cevabı Türkçe ver.',
       `Bugünün tarihi: ${fD(nowMs)}.`
     ];
     if (o.personal) parts.push(`Doğum bilgisi: ${String(i.day).padStart(2, '0')}.${String(i.month).padStart(2, '0')}.${i.year} saat ${String(i.hour).padStart(2, '0')}:${String(i.minute).padStart(2, '0')} (yerel saat), ${i.city || ''} (${i.lat.toFixed(2)}°, ${i.lon.toFixed(2)}°).`);
@@ -4034,7 +4057,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
   }
 
   function opts() {
-    return { q: $('#askQ').value, personal: $('#askPersonal').checked, classical: $('#askClassical').checked, transits: $('#askTransits').checked,
+    return { instr: $('#askInstr').value, q: $('#askQ').value, personal: $('#askPersonal').checked, classical: $('#askClassical').checked, transits: $('#askTransits').checked,
       prog: $('#askProg').checked, year: $('#askYear').checked, texts: $('#askTexts').checked, months: +$('#askMonths').value };
   }
   function refresh() {
@@ -4065,6 +4088,13 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
         <p>Bu sekme hiçbir yere bağlanmaz. Haritanın hesaplanmış verilerini tek bir metin hâline getirir; sen bu metni kullandığın yapay zekâya (Claude, ChatGPT, Gemini…) yapıştırıp sorunu sorarsın. Metnin başında yapay zekâya konumları yeniden hesaplamaması, veride olmayanı uydurmaması ve kaynak alıntısıyla kendi yorumunu ayırması söylenir.</p>
         <label for="askQ"><b>Sorun</b></label>
         <textarea id="askQ" rows="3" placeholder="Örnek: Önümüzdeki 6 ay iş değiştirmek için nasıl görünüyor? Hangi tarihler öne çıkıyor?"></textarea>
+        <div class="askstyle"><label for="askStyle"><b>Yorum tarzı</b></label>
+          <select id="askStyle">${Object.entries(STYLES).map(([k, v]) => `<option value="${k}">${esc(v.ad)}</option>`).join('')}<option value="ozel">Kendi talimatım</option></select>
+          <details id="askInstrBox"><summary>Yapay zekâya verilen talimatı göster / değiştir</summary>
+            <textarea id="askInstr" rows="12"></textarea>
+            <p class="muted small">Bu metni istediğin gibi değiştirebilirsin; değiştirdiğin anda "Kendi talimatım" seçilir ve bu cihazda saklanır. Uydurmama ve kaynak ile yorumu ayırma kuralları her durumda metne ayrıca eklenir.</p>
+            <button type="button" id="askReset" class="btn sec">Önerilen talimata dön</button>
+          </details></div>
         <div class="askopts">
           <label><input type="checkbox" id="askClassical" checked><span>Klasik (zâyiçe) bilgileri</span></label>
           <label><input type="checkbox" id="askTransits" checked><span>Transitler</span></label>
@@ -4080,13 +4110,17 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
         <details><summary>Kopyalanacak metni göster</summary><textarea id="askOut" rows="16" readonly></textarea></details>
         <p class="muted small">İpucu: Aynı sohbette yeni sorular sormaya devam edebilirsin; verileri tekrar yapıştırmana gerek yok. Başka bir kişi ya da başka bir gün için yeni bir sohbet açıp metni yeniden kopyala.</p>
       </section>`;
+      const st = styleState(); $('#askStyle').value = st.mode; $('#askInstr').value = instrText(st);
+      $('#askStyle').addEventListener('change', () => { const o = styleState(); o.mode = $('#askStyle').value; $('#askInstr').value = instrText(o); saveStyle(o); });
+      $('#askInstr').addEventListener('input', () => { const o = { mode: 'ozel', custom: $('#askInstr').value }; $('#askStyle').value = 'ozel'; saveStyle(o); });
+      $('#askReset').addEventListener('click', () => { saveStyle({ mode: 'sentez', custom: styleState().custom }); $('#askStyle').value = 'sentez'; $('#askInstr').value = STYLES.sentez.text; refresh(); });
       el.addEventListener('input', refresh); el.addEventListener('change', refresh);
       $('#askCopy').addEventListener('click', copy);
       if ($('#askShare')) $('#askShare').addEventListener('click', share);
     }
     refresh();
   }
-  root.AstroAsk = { render, build };
+  root.AstroAsk = { render, build, STYLES };
 })(window);
 </script>
 <script>/* "Harita Türleri" sekmesi: transit, progresyon, güneş yayı, üçlü, güneş/ay dönüşü, sinastri, kompozit, Davison, ayna (antiscia).
@@ -4604,7 +4638,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       </section>
       <section class="card avoid"><h2>Bölümler</h2>
         <ul class="toc">
-          <li><b>Batı Haritası</b> — modern astrolojinin dairesel haritası, gezegen konumları, açılar ve yorumlar.</li>
+          <li><b>Natal Harita</b> — modern astrolojinin dairesel haritası, gezegen konumları, açılar ve yorumlar.</li>
           <li><b>Harita Türleri</b> — transit, progresyon, güneş yayı, üçlü harita, güneş ve ay dönüşü, sinastri, kompozit, Davison ve ayna (antiscia) haritaları; tarih ileri geri alınabilir.</li>
           <li><b>Zâyiçe</b> — Osmanlı/İslam dünyasının klasik ilm-i ahkâm-ı nücûm geleneği: yedi seyyâre, makamlar, sa'd-nahs, talih noktası, Ay menzili, fardâr dönemleri.</li>
           <li><b>Bugünkü Gökyüzü</b> — şu anki gezegenler, Ay'ın evresi ve menzili, sana etki eden transitler, bugünün gezegen saatleri ve Saatlerin Hazinesi kitabına sayfa bağlantıları.</li>
@@ -4627,7 +4661,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     const elRow = Object.entries(W.el).map(([k, v]) => `<div class="bar"><span>${D.ELEMENTS[k].tr}</span><i style="width:${v * 6}%"></i><b>${v}</b></div>`).join('');
     const mdRow = Object.entries(W.md).map(([k, v]) => `<div class="bar"><span>${D.MODES[k].tr}</span><i style="width:${v * 6}%"></i><b>${v}</b></div>`).join('');
     $('#p-bati').innerHTML = `
-      <section class="card avoid"><h2>Batı Haritası</h2>
+      <section class="card avoid"><h2>Natal Harita (doğum haritası, Batı astrolojisi)</h2>
         <div class="two"><div>${wheel(ch, W)}</div>
         <div><table class="t"><thead><tr><th>Gezegen</th><th>Konum</th><th>Ev</th><th></th></tr></thead><tbody>
           <tr><td>ASC Yükselen</td><td>${SG(W.ascSign)} ${A.fmtDeg(ch.asc)}</td><td>1</td><td></td></tr>
