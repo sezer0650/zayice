@@ -311,7 +311,7 @@ details.leo>p{padding:0 6px}
     <div class="panel" id="p-kitaplik"></div>
   </div>
 </main>
-<footer>Gezegen konumları astronomy-engine (MIT lisansı) ile hesaplanır; Swiss Ephemeris ile karşılaştırılarak doğrulanmıştır. Sürüm 25 · İnternetsiz çalışır.</footer>
+<footer>Gezegen konumları astronomy-engine (MIT lisansı) ile hesaplanır; Swiss Ephemeris ile karşılaştırılarak doğrulanmıştır. Sürüm 26 · İnternetsiz çalışır.</footer>
 <div id="updBar" class="upd" hidden>Yeni sürüm hazır. <button type="button" class="btn" id="updBtn">Yenile</button></div>
 <script>/*
  MIT
@@ -1114,7 +1114,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
   const P = id => D.PLANETS[id];
 
   /* ================= BATI ================= */
-  const DEFAULT_OPTS = { maxOrb: 3, minorOrb: 1.5, types: ['conj', 'sext', 'square', 'trine', 'opp', 'semisext', 'semisq', 'quintile', 'sesqui', 'biquintile', 'quincunx'] };
+  const DEFAULT_OPTS = { maxOrb: 3, minorOrb: 1.5, lumExtra: 2, nodes: true, types: ['conj', 'sext', 'square', 'trine', 'opp', 'semisext', 'semisq', 'quintile', 'sesqui', 'biquintile', 'quincunx'] };
   function findAspects(pts, opts) {
     const res = [];
     for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++) {
@@ -1122,12 +1122,18 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       const angle = x => ['asc', 'mc'].includes(x.id);
       if (angle(a) && angle(b)) continue;
       const astPair = (D.PLANETS[a.id] && D.PLANETS[a.id].ast) || (D.PLANETS[b.id] && D.PLANETS[b.id].ast);
+      const nodePair = a.id === 'node' || b.id === 'node';
+      if (nodePair && (angle(a) || angle(b))) continue;
+      const lum = ['sun', 'moon'].includes(a.id) || ['sun', 'moon'].includes(b.id);
       const sep = Math.abs(angDiff(a.lon, b.lon));
       for (const as of D.ASPECTS) {
         if (!opts.types.includes(as.id)) continue;
         if (astPair && !as.major) continue;
+        if (nodePair && !['conj', 'opp', 'square'].includes(as.id)) continue;
         let orb = as.major ? opts.maxOrb : Math.min(opts.minorOrb, opts.maxOrb);
+        if (lum && as.major && !nodePair) orb += (opts.lumExtra || 0);   // ışıklar (Güneş, Ay) için geleneksel olarak daha geniş tolerans
         if (astPair) orb = Math.min(orb, 2);
+        if (nodePair) orb = Math.min(orb, 3);
         const o = Math.abs(sep - as.angle);
         if (o <= orb) {
           // yaklaşan mı ayrılan mı (1 gün sonra tolerans küçülüyorsa yaklaşan)
@@ -1140,7 +1146,13 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
             const sep2 = Math.abs(angDiff(mv.lon + mv.speed, fx.lon));
             applying = Math.abs(sep2 - as.angle) < o;
           }
-          res.push({ a: a.id, b: b.id, type: as.id, major: as.major, orb: o, exact: o < 1, applying });
+          // burç dışı (dissociate) açı: burç farkı açının olağan burç farkına uymuyor
+          const SD = { conj: 0, semisext: 1, sext: 2, square: 3, trine: 4, quincunx: 5, opp: 6 };
+          let sd = Math.abs(signIdx(a.lon) - signIdx(b.lon)); sd = Math.min(sd, 12 - sd);
+          const oos = SD[as.id] !== undefined && sd !== SD[as.id];
+          let A = a.id, B = b.id, T = as.id;
+          if (nodePair && as.id === 'opp') { T = 'conj'; if (A === 'node') A = 'snode'; else B = 'snode'; }   // Kuzey Düğüme karşıt = Güney Düğüme kavuşum
+          res.push({ a: A, b: B, type: T, major: as.major, orb: o, exact: o < 1, applying, oos, node: nodePair || undefined });
           break;
         }
       }
@@ -1168,11 +1180,68 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       else if (ben) t += ' Uğurlu (benefik) bir gezegen içerdiği için bu güç daha kolay olumlu yöne akar.';
       else if (mal) t += ' Zorlu (malefik) bir gezegen içerdiği için bu gücün bilinçli yönetilmesi daha da önemlidir.';
     }
+    if ((a.a === 'node' || a.b === 'node') && a.type === 'square') t += ' Gezegen Ay Düğümleri eksenine kare yapıyor: modern astrolojide "atlanmış adım" denir; bu gezegenin konuları, alışılmış eğilimlerle (Güney Düğüm) gelişim yönü (Kuzey Düğüm) arasında bilinçli bir denge kurmayı ister.';
+    else if (a.a === 'snode' || a.b === 'snode') t += ' Güney Düğüm üzerindeki gezegen, kişinin kolayca başvurduğu, hazır bildiği bir yetenek ya da alışkanlık gibi okunur; aşırıya kaçınca insanı geride tutabilir. Klasik gelenekte Güney Düğüm (Zeneb) dokunduğu gezegeni zayıflatıcı sayılır.';
+    else if (a.a === 'node' || a.b === 'node') t += ' Kuzey Düğüm üzerindeki gezegen, kişinin geliştirmeye çağrıldığı yönü vurgular; klasik gelenekte Kuzey Düğüm (Re\'s) dokunduğu gezegeni büyütücü sayılır.';
+    if (a.oos) t += ' Bu açı burç dışıdır (dissociate): dereceler açıyı oluşturuyor ama gezegenler açının olağan burç ilişkisinde değil; etkisi daha örtük ve daha az kendiliğinden işler diye yorumlanır.';
     if (a.applying === true) t += ' Açı yaklaşan (ittisâl) durumda; geleneksel olarak etkisi daha güçlü ve ileriye dönük sayılır.';
     else if (a.applying === false) t += ' Açı ayrılan (infisâl) durumda; etkisi daha çok geçmişten gelen bir birikim gibi yorumlanır.';
     return t;
   }
 
+
+
+  const PAT_TR = { tsquare: 'T-kare', gcross: 'Büyük kare', gtrine: 'Büyük üçgen', kite: 'Uçurtma', yod: 'Yod (Tanrı\'nın parmağı)', nodesq: 'Ay Düğümleri eksenine kare', stellium: 'Yığılma (stelyum)', reception: 'Karşılıklı ağırlama' };
+  function patternText(x) {
+    const n = id => P(id).tr, L = ids => ids.map(n).join(', ');
+    switch (x.type) {
+      case 'tsquare': return `${L(x.ids.filter(i => i !== x.apex))} karşıt; ikisi de ${n(x.apex)} ile kare. Odak (tepe) gezegen ${n(x.apex)}: gerilim bu gezegenin konularında birikir ve oradan çözüm arar. T-kare harekete geçiren, zorlayıcı ama başarı için güçlü bir yapıdır.`;
+      case 'gcross': return `${L(x.ids)} iki karşıt ve dört kare açıyla büyük bir kare kuruyor: dört yönden gelen sürekli bir gerilim; dayanıklılık ve çok yönlü sorumluluk.`;
+      case 'gtrine': return `${L(x.ids)} birbirine üçgen: aynı elementte akıcı bir yetenek dairesi. Kolaylık getirir ama tembellik ve "kendi içine kapalı" kalma riski taşır.`;
+      case 'kite': return `${L(x.ids.filter(i => i !== x.apex))} büyük üçgenine ${n(x.apex)} karşıt ve iki altmışlıkla bağlanıyor: büyük üçgenin yeteneği ${n(x.apex)} üzerinden dışa ve hedefe yönelir.`;
+      case 'yod': return `${L(x.ids.filter(i => i !== x.apex))} altmışlık; ikisi de ${n(x.apex)} ile yüz ellilik. Odak ${n(x.apex)}: sürekli ayar ve uyum gerektiren, "özel bir görev" duygusu veren gergin bir yapı.`;
+      case 'nodesq': return `Ay Düğümleri eksenine kare yapan ${x.ids.length > 1 ? 'gezegenler' : 'gezegen'}: ${L(x.ids)}. Eksenle (Kuzey ve Güney Düğüm karşıtlığı) birlikte T-kare benzeri bir yapı kurar; modern astrolojide ${x.ids.length > 1 ? 'bu gezegenlerin' : 'bu gezegenin'} konuları, geçmiş alışkanlıklarla gelişim yönü arasında bilinçli bir denge ister.`;
+      case 'stellium': return `${L(x.ids)} ${D.SIGNS[x.sign].tr} burcunda toplanmış: bu burcun nitelikleri ve onun efendisi (${n(D.SIGNS[x.sign].ruler)}) haritada belirgin.`;
+      case 'reception': return `${n(x.ids[0])} ile ${n(x.ids[1])} birbirinin burcunda: karşılıklı ağırlama (mutual reception). İki gezegen birbirini destekler, yer değiştirmiş gibi çalışabilir; ikisi de güçlenmiş sayılır.`;
+    }
+    return '';
+  }
+  /* Açı desenleri ve karşılıklı ağırlama */
+  function patterns(ch, aspects) {
+    const PLS = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
+    const has = (x, y, t) => aspects.some(a => a.type === t && ((a.a === x && a.b === y) || (a.a === y && a.b === x)));
+    const ps = PLS.filter(id => ch.planets.some(p => p.id === id)), out = [], key = a => a.slice().sort().join('+');
+    const seen = new Set(), push = (o) => { const k = o.type + ':' + key(o.ids); if (!seen.has(k)) { seen.add(k); out.push(o); } };
+    for (let i = 0; i < ps.length; i++) for (let j = i + 1; j < ps.length; j++) for (let k = 0; k < ps.length; k++) {
+      const a = ps[i], b = ps[j], c = ps[k]; if (c === a || c === b) continue;
+      if (has(a, b, 'opp') && has(a, c, 'square') && has(b, c, 'square')) push({ type: 'tsquare', ids: [a, b, c], apex: c });
+      if (k > j && has(a, b, 'trine') && has(a, c, 'trine') && has(b, c, 'trine')) push({ type: 'gtrine', ids: [a, b, c] });
+      if (has(a, b, 'sext') && has(a, c, 'quincunx') && has(b, c, 'quincunx')) push({ type: 'yod', ids: [a, b, c], apex: c });
+    }
+    out.filter(x => x.type === 'tsquare').forEach(t => {
+      const [a, b, c] = t.ids; ps.forEach(d => { if (![a, b, c].includes(d) && has(c, d, 'opp') && has(a, d, 'square') && has(b, d, 'square')) push({ type: 'gcross', ids: [a, b, c, d] }); });
+    });
+    out.filter(x => x.type === 'gtrine').forEach(g => {
+      g.ids.forEach(v => { const o = g.ids.filter(x => x !== v); ps.forEach(d => { if (!g.ids.includes(d) && has(v, d, 'opp') && has(o[0], d, 'sext') && has(o[1], d, 'sext')) push({ type: 'kite', ids: [...g.ids, d], apex: d }); }); });
+    });
+    // büyük kare varsa içindeki T-kareleri ayrıca gösterme
+    const gc = out.filter(x => x.type === 'gcross');
+    const res = out.filter(x => !(x.type === 'tsquare' && gc.some(g => x.ids.every(i => g.ids.includes(i)))));
+    // Ay Düğümleri eksenine kare yapan gezegenler (eksenle birlikte T-kare benzeri bir yapı)
+    const nsq = ps.filter(x => has(x, 'node', 'square'));
+    if (nsq.length) res.push({ type: 'nodesq', ids: nsq });
+    // yığılma (stelyum): aynı burçta 3+ gezegen
+    const bySign = {}; ps.forEach(x => { const s = signIdx(ch.planets.find(p => p.id === x).lon); (bySign[s] = bySign[s] || []).push(x); });
+    Object.entries(bySign).forEach(([s, ids]) => { if (ids.length >= 3) res.push({ type: 'stellium', ids, sign: +s }); });
+    // karşılıklı ağırlama (hâne/burç yöneticiliğiyle; klasik yöneticiler)
+    const sgOf = id => signIdx(ch.planets.find(p => p.id === id).lon);
+    const CL = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn'].filter(id => ch.planets.some(p => p.id === id));
+    for (let i = 0; i < CL.length; i++) for (let j = i + 1; j < CL.length; j++) {
+      const a = CL[i], b = CL[j];
+      if (D.SIGNS[sgOf(a)].ruler === b && D.SIGNS[sgOf(b)].ruler === a) res.push({ type: 'reception', ids: [a, b] });
+    }
+    return res;
+  }
   function western(ch, opts) {
     opts = Object.assign({}, DEFAULT_OPTS, opts || {});
     const pos = ch.planets.map(p => {
@@ -1183,7 +1252,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     const ascSign = signIdx(ch.asc), mcSign = signIdx(ch.mc);
 
     // Açılar
-    const pts = pos.filter(p => p.id !== 'snode' && p.id !== 'node')
+    const pts = pos.filter(p => p.id !== 'snode' && (p.id !== 'node' || opts.nodes))
       .concat([{ id: 'asc', lon: ch.asc }, { id: 'mc', lon: ch.mc }]);
     const aspects = findAspects(pts, opts);
 
@@ -1238,10 +1307,12 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     const aspTexts = aspects.map(a => {
       const as = D.ASPECTS.find(x => x.id === a.type);
       return { a: a.a, b: a.b, type: a.type, major: a.major, orb: a.orb, applying: a.applying,
-        title: `${nmS(a.a)} ${as.g} ${nmS(a.b)} — ${as.tr}${as.ot ? ' / ' + as.ot : ''} (${a.orb.toFixed(1)}°${a.applying === true ? ', yaklaşan' : a.applying === false ? ', ayrılan' : ''})`,
+        title: `${nmS(a.a)} ${as.g} ${nmS(a.b)} — ${as.tr}${as.ot ? ' / ' + as.ot : ''} (${a.orb.toFixed(1)}°${a.applying === true ? ', yaklaşan' : a.applying === false ? ', ayrılan' : ''}${a.oos ? ', burç dışı' : ''})`, oos: a.oos,
         body: aspectText(a) };
     });
-    return { opts, stars, starHits, pos, byId, aspects, aspTexts, el, md, domEl, domMd, ranked, ascRulerT, ascRulerM, texts, ascSign, mcSign };
+    const pats = patterns(ch, aspects);
+    pats.forEach(x => { x.text = patternText(x); });
+    return { opts, stars, starHits, pos, byId, aspects, aspTexts, pats, el, md, domEl, domMd, ranked, ascRulerT, ascRulerM, texts, ascSign, mcSign };
   }
   const capital = s => s.charAt(0).toLocaleUpperCase('tr') + s.slice(1);
 
@@ -1395,7 +1466,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     return { rows, agree, differ, notes };
   }
 
-  root.AstroAnalysis = { CAT, DEFAULT_STARS, DEFAULT_OPTS, findAspects, starsAt, western, zayice, compare, fmtDeg, signIdx, inSign, dignities };
+  root.AstroAnalysis = { CAT, DEFAULT_STARS, DEFAULT_OPTS, PAT_TR, findAspects, patterns, starsAt, western, zayice, compare, fmtDeg, signIdx, inSign, dignities };
   if (typeof module !== 'undefined') module.exports = root.AstroAnalysis;
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
@@ -3978,8 +4049,11 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       const KH = root.AstroApp && root.AstroApp.keyHouseReading;
       if (KH) [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].forEach(h => { const r = KH(ch, h); if (r) r.out.forEach(x => out.push(`- ${h}. ev, ${r.H.title} — ${x.why} (paragraf ${x.e.n}): "${x.e.tr}"`)); });
     }
-    out.push('', `Açılar (en fazla ${W.opts.maxOrb}° tolerans; "yaklaşan" henüz tamlaşmamış, "ayrılan" geçmiş demek):`);
-    W.aspects.forEach(a => { const e = withTexts ? keyFor(a) : null; out.push(`- ${PN(a.a)} ${aspName(a.type)} ${PN(a.b)} (tolerans ${a.orb.toFixed(1)}°${a.applying === true ? ', yaklaşan' : a.applying === false ? ', ayrılan' : ''}${a.major ? '' : ', minör'})` + (e ? `\n  Alan Leo, The Key to Your Own Nativity (paragraf ${e.n}, s. ${e.p}): "${e.tr}"` : '')); });
+    out.push('', `Açılar (en fazla ${W.opts.maxOrb}° tolerans${W.opts.lumExtra ? `, Güneş ve Ay'ın majör açılarında +${W.opts.lumExtra}°` : ''}${W.opts.nodes ? '; Ay Düğümlerine kavuşum ve kareler dahil' : ''}; "yaklaşan" henüz tamlaşmamış, "ayrılan" geçmiş demek; "burç dışı" açının olağan burç ilişkisinde olmadığı demek):`);
+    W.aspects.forEach(a => { const e = withTexts ? keyFor(a) : null; out.push(`- ${PN(a.a)} ${aspName(a.type)} ${PN(a.b)} (tolerans ${a.orb.toFixed(1)}°${a.applying === true ? ', yaklaşan' : a.applying === false ? ', ayrılan' : ''}${a.oos ? ', burç dışı' : ''}${a.major ? '' : ', minör'})` + (e ? `\n  Alan Leo, The Key to Your Own Nativity (paragraf ${e.n}, s. ${e.p}): "${e.tr}"` : '')); });
+    const PT = root.AstroAnalysis.PAT_TR;
+    out.push('', 'Açı desenleri ve karşılıklı ağırlamalar (uygulamanın hesapladığı):');
+    out.push((W.pats || []).length ? W.pats.map(x => `- ${PT[x.type]}: ${x.ids.map(PN).join(', ')}${x.apex ? ` (odak: ${PN(x.apex)})` : ''}${x.sign !== undefined ? ` (${D.SIGNS[x.sign].tr})` : ''}`).join('\n') : '- Belirgin bir desen yok.');
     if (W.starHits && W.starHits.length) {
       out.push('', 'Sabit yıldız kavuşumları:');
       W.starHits.forEach(h => out.push(`- ${PN(h.p)} ile ${h.star.name || h.star[0]} (tolerans ${h.orb.toFixed(1)}°)`));
@@ -4074,6 +4148,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     if (o.prog) parts.push(progBlock(ch, nowMs, o.texts));
     if (o.year) parts.push(yearBlock(ch, nowMs));
     parts.push('## SORUM', o.q && o.q.trim() ? o.q.trim() : '(Sorunu buraya yaz.)');
+    parts.push('## METİN SONU (bu satır görünüyorsa metnin tamamı ulaşmıştır)');
     return parts.join('\n\n');
   }
 
@@ -4086,12 +4161,38 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     let t; try { t = build(opts()); } catch (e) { console.error(e); t = 'Metin hazırlanırken hata: ' + e.message; }
     $('#askOut').value = t;
     $('#askCount').textContent = `${t.length.toLocaleString('tr-TR')} karakter`;
+    const pc = chunks(t).length, w = $('#askWarn');
+    if (w) w.innerHTML = t.length > LIMIT ? `Metin uzun (${t.length.toLocaleString('tr-TR')} karakter). Bazı yapay zekâ uygulamaları uzun yapıştırmayı keser ya da ikiye böler; yapay zekâ metnin sonundaki "METİN SONU" satırını görmüyorsa metin kesilmiş demektir. Böyle olursa <b>Parça parça kopyala</b> düğmesini kullan (${pc} parça) ya da "Leo'nun yorum metinlerini ekle" seçeneğini kapat.` : '';
+    PART = 0; const pb = $('#askParts'); if (pb) { pb.hidden = t.length <= LIMIT; pb.textContent = `Parça parça kopyala (1/${pc})`; }
   }
   async function copy() {
     refresh(); const t = $('#askOut').value; let ok = false;
     try { if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(t); ok = true; } } catch (e) { }
     if (!ok) { const ta = $('#askOut'); ta.focus(); ta.select(); try { ok = document.execCommand('copy'); } catch (e) { } ta.setSelectionRange(0, 0); }
     $('#askMsg').textContent = ok ? 'Kopyalandı. Şimdi yapay zekâ uygulamanı açıp mesaj kutusuna yapıştır.' : 'Otomatik kopyalanamadı. Aşağıdaki kutudaki metni seçip elle kopyala.';
+  }
+  const LIMIT = 14000; let PART = 0;
+  function chunks(t) {
+    const secs = t.split(/\n\n(?=## )/), out = []; let cur = '';
+    secs.forEach(sec => {
+      const pieces = []; if (sec.length <= LIMIT) pieces.push(sec); else { let buf = ''; sec.split('\n').forEach(l => { if ((buf + '\n' + l).length > LIMIT && buf) { pieces.push(buf); buf = l; } else buf = buf ? buf + '\n' + l : l; }); if (buf) pieces.push(buf); }
+      pieces.forEach(pc => { if ((cur + '\n\n' + pc).length > LIMIT && cur) { out.push(cur); cur = pc; } else cur = cur ? cur + '\n\n' + pc : pc; });
+    });
+    if (cur) out.push(cur);
+    return out;
+  }
+  async function writeClip(t) {
+    let ok = false;
+    try { if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(t); ok = true; } } catch (e) { }
+    if (!ok) { const ta = document.createElement('textarea'); ta.value = t; document.body.appendChild(ta); ta.select(); try { ok = document.execCommand('copy'); } catch (e) { } ta.remove(); }
+    return ok;
+  }
+  async function copyPart() {
+    const t = $('#askOut').value, cs = chunks(t), n = cs.length, i = PART % n;
+    const head = i < n - 1 ? `[PARÇA ${i + 1}/${n}] Bu, bir doğum haritası metninin parçasıdır. Tüm parçalar gelene kadar yorum yapma, yalnızca "Parça ${i + 1} alındı" yaz.\n\n` : `[PARÇA ${n}/${n} — SON PARÇA] Şimdi önceki parçalarla birlikte bütün metni değerlendir ve "SORUM" bölümündeki soruyu cevapla.\n\n`;
+    const ok = await writeClip(head + cs[i]);
+    $('#askMsg').textContent = ok ? `Parça ${i + 1}/${n} kopyalandı. Yapay zekâya yapıştır, gönder; sonra bu düğmeye yeniden basıp sıradaki parçayı al.` : 'Kopyalanamadı.';
+    PART = (i + 1) % n; $('#askParts').textContent = PART ? `Sıradaki parçayı kopyala (${PART + 1}/${n})` : `Parça parça kopyala (1/${n})`;
   }
   async function share() {
     refresh(); const t = $('#askOut').value;
@@ -4126,7 +4227,8 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
           <label><input type="checkbox" id="askPersonal"><span>Doğum tarihi, saati ve yerini de ekle</span></label>
         </div>
         <p class="muted small">Doğum tarihi ve yeri varsayılan olarak metne eklenmez; gezegen konumları yorum için yeterlidir. Ad hiçbir zaman eklenmez.</p>
-        <div class="askbtns"><button type="button" id="askCopy" class="btn">Kopyala</button>${navigator.share ? '<button type="button" id="askShare" class="btn sec">Paylaş (telefonda doğrudan uygulamaya gönder)</button>' : ''}<span id="askCount" class="muted small"></span></div>
+        <div class="askbtns"><button type="button" id="askCopy" class="btn">Kopyala</button>${navigator.share ? '<button type="button" id="askShare" class="btn sec">Paylaş (telefonda doğrudan uygulamaya gönder)</button>' : ''}<button type="button" id="askParts" class="btn sec" hidden>Parça parça kopyala</button><span id="askCount" class="muted small"></span></div>
+        <p id="askWarn" class="small muted"></p>
         <p id="askMsg" class="small"></p>
         <details><summary>Kopyalanacak metni göster</summary><textarea id="askOut" rows="16" readonly></textarea></details>
         <p class="muted small">İpucu: Aynı sohbette yeni sorular sormaya devam edebilirsin; verileri tekrar yapıştırmana gerek yok. Başka bir kişi ya da başka bir gün için yeni bir sohbet açıp metni yeniden kopyala.</p>
@@ -4137,11 +4239,12 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       $('#askReset').addEventListener('click', () => { saveStyle({ mode: 'sentez', custom: styleState().custom }); $('#askStyle').value = 'sentez'; $('#askInstr').value = STYLES.sentez.text; refresh(); });
       el.addEventListener('input', refresh); el.addEventListener('change', refresh);
       $('#askCopy').addEventListener('click', copy);
+      $('#askParts').addEventListener('click', copyPart);
       if ($('#askShare')) $('#askShare').addEventListener('click', share);
     }
     refresh();
   }
-  root.AstroAsk = { render, build, STYLES };
+  root.AstroAsk = { render, build, STYLES, chunks };
 })(window);
 </script>
 <script>/* "Harita Türleri" sekmesi: transit, progresyon, güneş yayı, üçlü, güneş/ay dönüşü, sinastri, kompozit, Davison, ayna (antiscia).
@@ -4904,10 +5007,11 @@ window.AstroLibIdx = [{"id":"celik1994","title":"Astroloji El Kitabı","author":
           ${rowsAst ? `<tr><td colspan="5" class="muted small" style="padding-top:10px">Asteroitler ve sanal noktalar</td></tr>${rowsAst}` : ''}</tbody></table>
           <p class="muted small">Ev sistemi: ${hs}${ch.houseSystem !== ($('#hs').value) ? ' (bu enlemde Placidus hesaplanamadığı için Porphyry kullanıldı)' : ''}. Hız: gezegenin bir günde katettiği yol (eksi = geri gidiyor). <b class="rmark">R</b> geri hareket (retro), <b class="rmark">S</b> durağan (istasyon; yön değiştirmek üzere), <b class="rmark">SR</b> geri harekette durağan. K./G. Düğüm: Kuzey ve Güney Ay Düğümü (Re's ve Zeneb), MC: Tepe noktası.</p></div></div>
         <table class="t cusps"><tr>${cusps.slice(0, 6).join('')}</tr><tr>${cusps.slice(6).join('')}</tr></table>
-        <nav class="toc small"><b>Bu sekmede:</b> <a href="#natEmp">Yoğunlaşmalar (stelyum)</a> · <a href="#natAsp">Gezegen açıları</a> · <a href="#natKey">Yükselen ve kişilik</a> · <a href="#natPl">Gezegen yorumları</a> · <a href="#natAspTx">Açı yorumları</a> · <a href="#libNat">Kitaplığım</a></nav>
+        <nav class="toc small"><b>Bu sekmede:</b> <a href="#natEmp">Yoğunlaşmalar (stelyum)</a> · <a href="#natAsp">Gezegen açıları</a> · <a href="#natPat">Açı desenleri</a> · <a href="#natKey">Yükselen ve kişilik</a> · <a href="#natPl">Gezegen yorumları</a> · <a href="#natAspTx">Açı yorumları</a> · <a href="#libNat">Kitaplığım</a></nav>
       </section>
       ${emphasisSection(ch)}
       ${natalAspects(W)}
+      ${patternSection(W)}
       <div id="libNat"></div>
       <section class="card avoid"><h2>Element ve Nitelik Dengesi</h2><div class="two"><div>${elRow}</div><div>${mdRow}</div></div>
         <p>${D.ELEMENTS[W.domEl[0][0]].text} ${D.MODES[W.domMd[0][0]].text}</p>
@@ -5109,7 +5213,9 @@ window.AstroLibIdx = [{"id":"celik1994","title":"Astroloji El Kitabı","author":
           <div><b class="small">Majör açılar</b><br>${ASP_IDS_MAJOR.map(cb).join('')}</div>
           <div><b class="small">Minör açılar</b><br>${ASP_IDS_MINOR.map(cb).join('')}</div>
           <div><label class="small">En fazla tolerans (orb)<select id="aspOrb">${[1, 2, 3, 4, 5, 6, 8].map(v => `<option value="${v}" ${+o.maxOrb === v ? 'selected' : ''}>${v}°</option>`).join('')}</select></label>
-            <p class="muted small" style="margin:6px 0 0">Varsayılan 3°. Minör açılarda tolerans en fazla ${o.minorOrb}° tutulur. Seçimler bu tarayıcıda hatırlanır.</p>
+            <label class="small" style="margin-top:8px;display:block">Güneş ve Ay için ek tolerans<select id="aspLum">${[0, 1, 2, 3, 5].map(v => `<option value="${v}" ${+o.lumExtra === v ? 'selected' : ''}>+${v}°</option>`).join('')}</select></label>
+            <label class="cb small"><input type="checkbox" id="aspNodes" ${o.nodes ? 'checked' : ''}> Ay Düğümlerinin açıları (kavuşum, kare)</label>
+            <p class="muted small" style="margin:6px 0 0">Varsayılan 3°; Güneş ve Ay'ın majör açılarında +2° (toplam 5°), çünkü ışıklar gelenekte daha geniş tolerans alır. Düğüm açılarında en fazla 3°. Minör açılarda tolerans en fazla ${o.minorOrb}° tutulur. Seçimler bu tarayıcıda hatırlanır.</p>
             <button type="button" class="btn sec" id="aspReset" style="margin-top:6px;padding:4px 10px">Varsayılana dön</button></div>
         </div>
       </section>
@@ -5173,12 +5279,18 @@ window.AstroLibIdx = [{"id":"celik1994","title":"Astroloji El Kitabı","author":
       <p class="muted small">"Stelyum" modern astrolojinin terimidir (genelde aynı burçta ya da evde 3 ve üzeri gezegen; burada Güneş'ten Plüton'a 10 gezegen sayıldı, Ay düğümleri ve asteroitler hariç). Klasik gelenekte ayrı bir adı yoktur, ama bir burçta toplanan gezegenler o burcun ve efendisinin önemini artırır.</p>
     </section>`;
   }
+  function patternSection(W) {
+    const P = W.pats || [], T = A.PAT_TR;
+    return `<section class="card avoid" id="natPat"><h2>Açı Desenleri ve Karşılıklı Ağırlamalar</h2>
+      ${P.length ? P.map(x => `<div class="item"><h3>${esc(T[x.type])} <span class="muted small">${x.ids.map(id => G(id) + ' ' + D.PLANETS[id].tr).join(' · ')}</span></h3><p>${esc(x.text)}</p></div>`).join('') : '<p>Bu haritada T-kare, büyük üçgen, büyük kare, yod, uçurtma gibi belirgin bir açı deseni ya da karşılıklı ağırlama yok.</p>'}
+      <p class="muted small">Desenler yukarıdaki açı ayarlarına göre (aynı toleranslarla) Güneş'ten Plüton'a 10 gezegen arasında aranır. Karşılıklı ağırlamada klasik burç yöneticileri kullanılır (ör. Kova'nın yöneticisi Satürn).</p></section>`;
+  }
   /* Natal gezegen açıları: tek bakışta liste + tablo (ayrıntılı yorumlar sayfanın aşağısında) */
   function natalAspects(W) {
     const PNm = id => id === 'asc' ? 'Yükselen' : id === 'mc' ? 'MC' : D.PLANETS[id].tr;
     const lab = id => id === 'asc' ? 'AS' : id === 'mc' ? 'MC' : G(id);
     const nmc = id => id === 'asc' || id === 'mc' ? PNm(id) : `${G(id)} ${PNm(id)}`;
-    const row = a => { const as = D.ASPECTS.find(x => x.id === a.type); return `<tr><td>${nmc(a.a)}</td><td style="color:${as.color}"><b>${as.g}</b> ${esc(as.tr.replace(/ \(.*\)/, ''))}</td><td>${nmc(a.b)}</td><td class="num">${a.orb.toFixed(1)}°${a.applying === true ? '<br><small class="muted">yaklaşan</small>' : a.applying === false ? '<br><small class="muted">ayrılan</small>' : ''}</td><td><a href="#asp-${a.a}-${a.b}-${a.type}" aria-label="yorum">›</a></td></tr>`; };
+    const row = a => { const as = D.ASPECTS.find(x => x.id === a.type); return `<tr><td>${nmc(a.a)}</td><td style="color:${as.color}"><b>${as.g}</b> ${esc(as.tr.replace(/ \(.*\)/, ''))}</td><td>${nmc(a.b)}</td><td class="num">${a.orb.toFixed(1)}°${a.applying === true ? '<br><small class="muted">yaklaşan</small>' : a.applying === false ? '<br><small class="muted">ayrılan</small>' : ''}${a.oos ? '<br><small class="rmark">burç dışı</small>' : ''}</td><td><a href="#asp-${a.a}-${a.b}-${a.type}" aria-label="yorum">›</a></td></tr>`; };
     const maj = W.aspTexts.filter(a => a.major), min = W.aspTexts.filter(a => !a.major);
     const RENK = `<p class="muted small">Renkler: <span style="color:#2f7a5a">yeşil/mavi</span> uyumlu, <span style="color:#b23b3b">kırmızı/mor</span> gergin, <span style="color:#8a6d1f">altın</span> kavuşum, <span style="color:#7a6aa8">eflatun</span> yaratıcı (beşlik) açılar. Tablodaki sayı, tam açıdan kaç derece saptığını (tolerans) gösterir; küçük sayı daha güçlü açı demektir. Hangi açıların ve hangi toleransın gösterileceği aşağıdaki "Açı Ayarları"ndan değiştirilir.</p>`;
     return `<section class="card avoid" id="natAsp"><h2>Natal Gezegen Açıları</h2>
@@ -5205,11 +5317,11 @@ window.AstroLibIdx = [{"id":"celik1994","title":"Astroloji El Kitabı","author":
   function bindAspectControls() {
     const upd = () => {
       const types = [...document.querySelectorAll('[data-asp]')].filter(x => x.checked).map(x => x.dataset.asp);
-      const o = Object.assign({}, A.DEFAULT_OPTS, { types, maxOrb: +$('#aspOrb').value });
+      const o = Object.assign({}, A.DEFAULT_OPTS, { types, maxOrb: +$('#aspOrb').value, lumExtra: +$('#aspLum').value, nodes: $('#aspNodes').checked });
       saveAspOpts(o); rerenderWestern();
     };
     document.querySelectorAll('[data-asp]').forEach(x => x.addEventListener('change', upd));
-    const sel = $('#aspOrb'); if (sel) sel.addEventListener('change', upd);
+    const sel = $('#aspOrb'); if (sel) sel.addEventListener('change', upd); ['#aspLum', '#aspNodes'].forEach(q => { const x = $(q); if (x) x.addEventListener('change', upd); });
     const rs = $('#aspReset'); if (rs) rs.addEventListener('click', () => { saveAspOpts(Object.assign({}, A.DEFAULT_OPTS)); rerenderWestern(); });
   }
   function rerenderWestern() {
