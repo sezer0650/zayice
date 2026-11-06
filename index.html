@@ -55,6 +55,8 @@ td.pos{color:var(--pos)}td.neg{color:var(--neg)}
 .big3{display:flex;gap:14px;margin:12px 0;flex-wrap:wrap}
 .big3>div{flex:1;min-width:120px;text-align:center;border:1px solid var(--line);border-radius:6px;padding:10px;background:#fbf4e2}
 .big3 .g{font-size:34px;line-height:1.1;color:var(--gold)}.big3 .k{font-size:13px;color:var(--muted)}.big3 .v{font-size:19px}
+.rmark{color:#c0392b;font-size:.85em;font-weight:600}.postab td,.postab th{padding:7px 6px}.postab td{white-space:nowrap;font-size:14px}.postab td,.postab th{padding:7px 4px}
+.natasp td{padding:7px 5px;font-size:14px}.natasp td:nth-child(4){white-space:nowrap}.natasp th{padding:6px}.natasp td:last-child a{font-size:22px;text-decoration:none;padding:0 6px}
 .toc{margin:0;padding-left:20px}
 .bar{display:grid;grid-template-columns:80px 1fr 30px;align-items:center;gap:8px;font-size:14px;margin:3px 0}
 .bar i{display:block;height:10px;background:var(--gold);border-radius:5px;max-width:100%}
@@ -223,6 +225,7 @@ details.leo.cur>summary{background:#fbf1d6}
 details.leo>p{padding:0 6px}
 #p-soru textarea{width:100%;min-height:90px;resize:vertical}
 #askOut{font:12.5px/1.5 ui-monospace,"Cascadia Mono",Consolas,Menlo,monospace;min-height:260px}
+.toc{margin:12px 0 0;line-height:1.9}.toc a{white-space:nowrap}
 .askstyle{margin:14px 0 0}.askstyle select{width:auto;max-width:100%;margin:6px 0 8px}#askInstr{font-size:14px;line-height:1.5;min-height:220px}
 .askopts{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:8px 18px;margin:14px 0 6px;padding:14px 16px;border:1px solid var(--line);border-radius:12px;background:#faf8f3}
 .askopts label{display:flex;align-items:center;justify-content:flex-start;gap:10px;text-align:left;color:var(--ink);font-size:14.5px;font-weight:400;cursor:pointer;margin:0;min-width:0}
@@ -299,7 +302,7 @@ details.leo>p{padding:0 6px}
     <div class="panel" id="p-soru"></div>
   </div>
 </main>
-<footer>Gezegen konumları astronomy-engine (MIT lisansı) ile hesaplanır; Swiss Ephemeris ile karşılaştırılarak doğrulanmıştır. Sürüm 22 · İnternetsiz çalışır.</footer>
+<footer>Gezegen konumları astronomy-engine (MIT lisansı) ile hesaplanır; Swiss Ephemeris ile karşılaştırılarak doğrulanmıştır. Sürüm 23 · İnternetsiz çalışır.</footer>
 <div id="updBar" class="upd" hidden>Yeni sürüm hazır. <button type="button" class="btn" id="updBtn">Yenile</button></div>
 <script>/*
  MIT
@@ -4655,8 +4658,20 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
 
   /* ---------- Batı ---------- */
   function renderWestern(ch, W) {
-    const rowsAst = W.pos.filter(p => D.PLANETS[p.id].ast).map(p => `<tr><td>${G(p.id)} ${D.PLANETS[p.id].tr}</td><td>${SG(p.sign)} ${A.fmtDeg(p.lon)}</td><td>${p.house}</td><td>${p.retro ? 'R' : ''}</td></tr>`).join('');
-    const rows = W.pos.filter(p => !D.PLANETS[p.id].ast).map(p => `<tr><td>${G(p.id)} ${D.PLANETS[p.id].tr}</td><td>${SG(p.sign)} ${A.fmtDeg(p.lon)}</td><td>${p.house}</td><td>${p.retro && !['node', 'snode'].includes(p.id) ? 'R' : ''}</td></tr>`).join('');
+    const STSP = { mercury: 0.33, venus: 0.12, mars: 0.06, jupiter: 0.03, saturn: 0.015, uranus: 0.009, neptune: 0.008, pluto: 0.006, chiron: 0.01 }; // bu hızın altı: durağan (istasyon)
+    const dm = v => { const a = Math.abs(v), d = Math.floor(a), m = Math.floor((a - d) * 60); return `${String(d).padStart(2, '0')}° ${String(m).padStart(2, '0')}'`; };
+    const dms = v => { const a = Math.abs(v), d = Math.floor(a), mf = (a - d) * 60, m = Math.floor(mf), sc = Math.floor((mf - m) * 60); return `${v < 0 ? '-' : ''}${String(d).padStart(2, '0')}° ${String(m).padStart(2, '0')}' ${String(sc).padStart(2, '0')}"`; };
+    const mark = p => {
+      if (['node', 'snode', 'sun', 'moon'].includes(p.id) || !p.speed) return '';
+      const st = STSP[p.id] && Math.abs(p.speed) < STSP[p.id];
+      const t = st ? (p.speed < 0 ? 'SR' : 'S') : p.retro ? 'R' : '';
+      const tip = { SR: 'durağan, geri harekete geçiyor ya da geri hareketin sonunda (istasyon)', S: 'durağan (istasyon), yön değiştirmek üzere', R: 'geri hareket (retro)' }[t];
+      return t ? ` <b class="rmark" title="${tip}">${t}</b>` : '';
+    };
+    const SHORT = { node: 'K. Düğüm', snode: 'G. Düğüm' };
+    const prow = p => `<tr><td>${G(p.id)} ${SHORT[p.id] || D.PLANETS[p.id].tr}${mark(p)}</td><td>${SG(p.sign)} ${D.SIGNS[p.sign].tr}</td><td class="num">${dm(p.lon % 30)}</td><td class="num">${p.house}</td><td class="num">${p.speed ? dms(p.speed) : '—'}</td></tr>`;
+    const rowsAst = W.pos.filter(p => D.PLANETS[p.id].ast).map(prow).join('');
+    const rows = W.pos.filter(p => !D.PLANETS[p.id].ast).map(prow).join('');
     const hs = { placidus: 'Placidus', porphyry: 'Porphyry', equal: 'Eşit', whole: 'Tam burç' }[ch.houseSystem];
     const cusps = ch.cusps.map((c, i) => `<td><small>${i + 1}</small><br>${SG(A.signIdx(c))} ${A.fmtDeg(c, false)}</td>`);
     const elRow = Object.entries(W.el).map(([k, v]) => `<div class="bar"><span>${D.ELEMENTS[k].tr}</span><i style="width:${v * 6}%"></i><b>${v}</b></div>`).join('');
@@ -4664,21 +4679,25 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     $('#p-bati').innerHTML = `
       <section class="card avoid"><h2>Natal Harita (doğum haritası, Batı astrolojisi)</h2>
         <div class="two"><div>${wheel(ch, W)}</div>
-        <div><table class="t"><thead><tr><th>Gezegen</th><th>Konum</th><th>Ev</th><th></th></tr></thead><tbody>
-          <tr><td>ASC Yükselen</td><td>${SG(W.ascSign)} ${A.fmtDeg(ch.asc)}</td><td>1</td><td></td></tr>
-          <tr><td>MC Tepe noktası</td><td>${SG(W.mcSign)} ${A.fmtDeg(ch.mc)}</td><td>10</td><td></td></tr>${rows}
-          ${rowsAst ? `<tr><td colspan="4" class="muted small" style="padding-top:10px">Asteroitler ve sanal noktalar</td></tr>${rowsAst}` : ''}</tbody></table>
-          <p class="muted small">Ev sistemi: ${hs}${ch.houseSystem !== ($('#hs').value) ? ' (bu enlemde Placidus hesaplanamadığı için Porphyry kullanıldı)' : ''}. R = geri hareket (retro).</p></div></div>
+        <div><table class="t postab"><thead><tr><th>Gezegen</th><th>Burç</th><th>Derece</th><th>Ev</th><th>Hız</th></tr></thead><tbody>
+          ${rows}
+          <tr><td>Yükselen</td><td>${SG(W.ascSign)} ${D.SIGNS[W.ascSign].tr}</td><td class="num">${dm(ch.asc % 30)}</td><td class="num">1</td><td></td></tr>
+          <tr><td>MC</td><td>${SG(W.mcSign)} ${D.SIGNS[W.mcSign].tr}</td><td class="num">${dm(ch.mc % 30)}</td><td class="num">10</td><td></td></tr>
+          ${rowsAst ? `<tr><td colspan="5" class="muted small" style="padding-top:10px">Asteroitler ve sanal noktalar</td></tr>${rowsAst}` : ''}</tbody></table>
+          <p class="muted small">Ev sistemi: ${hs}${ch.houseSystem !== ($('#hs').value) ? ' (bu enlemde Placidus hesaplanamadığı için Porphyry kullanıldı)' : ''}. Hız: gezegenin bir günde katettiği yol (eksi = geri gidiyor). <b class="rmark">R</b> geri hareket (retro), <b class="rmark">S</b> durağan (istasyon; yön değiştirmek üzere), <b class="rmark">SR</b> geri harekette durağan. K./G. Düğüm: Kuzey ve Güney Ay Düğümü (Re's ve Zeneb), MC: Tepe noktası.</p></div></div>
         <table class="t cusps"><tr>${cusps.slice(0, 6).join('')}</tr><tr>${cusps.slice(6).join('')}</tr></table>
+        <nav class="toc small"><b>Bu sekmede:</b> <a href="#natAsp">Gezegen açıları</a> · <a href="#natKey">Yükselen ve kişilik</a> · <a href="#natPl">Gezegen yorumları</a> · <a href="#natAspTx">Açı yorumları</a></nav>
       </section>
+      ${natalAspects(W)}
       <section class="card avoid"><h2>Element ve Nitelik Dengesi</h2><div class="two"><div>${elRow}</div><div>${mdRow}</div></div>
         <p>${D.ELEMENTS[W.domEl[0][0]].text} ${D.MODES[W.domMd[0][0]].text}</p>
         ${W.domEl[3][1] <= 1 ? `<p>${D.ELEMENTS[W.domEl[3][0]].tr} elementi zayıf: bu elementin temsil ettiği nitelikler hayatında bilinçli olarak geliştirilmesi gereken bir alan olarak yorumlanır.</p>` : ''}
       </section>
+      <div id="natKey"></div>
       ${keyRising(ch, W)}
       ${keyCore(ch, W)}
       ${keyHouses(ch, W)}
-      <section class="card"><h2>Gezegen Yorumları</h2>
+      <section class="card" id="natPl"><h2>Gezegen Yorumları</h2>
         ${W.texts.filter(t => !t.ast).map(t => `<div class="item avoid"><h3>${t.key === 'asc' ? 'ASC' : G(t.key)} ${esc(t.title)}</h3><p>${esc(t.body)}</p></div>`).join('')}
       </section>
       ${aspectSection(ch, W)}
@@ -4863,7 +4882,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       const miss = e.note === 'missing95' ? `<p class="muted small">${esc(KY.MISSING_95)}</p>` : '';
       return `<details class="small leokey"><summary>Klasik kaynak: Alan Leo'ya göre (doğum haritası)</summary><p>${esc(e.tr)}</p>${miss}<p class="muted small">Leo açıları üç sınıfta yorumlar: kavuşum, uğurlu (üçgen, altmışlık, yarım altmışlık) ve sıkıntılı (kare, karşıt, yarım kare, bir buçuk kare). Bu açı Leo'nun "${KCLS_TR[k]}" sınıfına girer. Kaynak: ${esc(KY.REF)}, Bölüm XVIII, paragraf ${e.n}, s. ${e.p}.</p></details>`;
     };
-    const item = t => `<div class="item avoid"><h3><span style="color:${D.ASPECTS.find(x => x.id === t.type).color}">${esc(t.title)}</span></h3><p>${esc(t.body)}</p>${leoKey(t)}${classic(t)}</div>`;
+    const item = t => `<div class="item avoid" id="asp-${t.a}-${t.b}-${t.type}"><h3><span style="color:${D.ASPECTS.find(x => x.id === t.type).color}">${esc(t.title)}</span></h3><p>${esc(t.body)}</p>${leoKey(t)}${classic(t)}</div>`;
     const fam = k => D.ASPECT_FAMILY[k] || '';
     return `<section class="card avoid"><h2>Açı Ayarları</h2>
         <div class="aspctl">
@@ -4874,14 +4893,11 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
             <button type="button" class="btn sec" id="aspReset" style="margin-top:6px;padding:4px 10px">Varsayılana dön</button></div>
         </div>
       </section>
-      <section class="card avoid"><h2>Açı Tablosu</h2>${aspectGrid(W)}
-        <p class="muted small">Renkler: <span style="color:#2f7a5a">yeşil/mavi</span> uyumlu, <span style="color:#b23b3b">kırmızı/mor</span> gergin, <span style="color:#8a6d1f">altın</span> kavuşum, <span style="color:#7a6aa8">eflatun</span> yaratıcı (beşlik) açılar. Sayı, tam açıdan kaç derece saptığını gösterir.</p>
-      </section>
       <section class="card avoid"><h2>Açı Türleri Ne Anlatır?</h2>
         ${D.ASPECTS.filter(a => a.major).map(a => `<p><b style="color:${a.color}">${a.g} ${a.tr}${a.ot ? ' / ' + a.ot : ''} (${a.angle}°)</b> — ${a.text}</p>`).join('')}
         <p class="muted small">${fam('uyumlu')} ${fam('gergin')}</p>
       </section>
-      <section class="card"><h2>Majör Açılar</h2>
+      <section class="card" id="natAspTx"><h2>Majör Açılar</h2>
         <p class="muted small">Sıralama: tam dereceye en yakın olan en güçlü. Yaklaşan (ittisâl) açılar ayrılan (infisâl) açılardan daha etkili sayılır.</p>
         ${maj.map(item).join('') || '<p>Seçili ayarlarla majör açı bulunamadı.</p>'}
       </section>
@@ -4899,6 +4915,23 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       <p class="muted small">Alan Leo'nun <i>The Key to Your Own Nativity</i> kitabının XVIII. bölümünün ("Güneş, Ay ve Gezegenlerin Konumları ve Açıları") tam Türkçe çevirisi. Metin olduğu gibi çevrildi; dönemin dili ve sert ifadeleri değiştirilmedi. Leo okura "sen" diye hitap eder. Her açının altındaki "Alan Leo'ya göre" kutusu bu bölümden gelir. Leo Plüton'u bilmiyordu; Yükselen ve MC'ye açıları bu bölümde yorumlamaz. ${esc(KY.MISSING_95)}</p>
       <details><summary>Leo'nun bölüm girişi (tam çeviri)</summary>${KY.ASP_INTRO.map(p => `<p>${esc(p)}</p>`).join('')}<p class="muted small">s. 84–85.</p></details>
       <details><summary>Bölümdeki bütün açı yorumları (${KY.ASP.length} metin)</summary>${groups}</details>
+    </section>`;
+  }
+  /* Natal gezegen açıları: tek bakışta liste + tablo (ayrıntılı yorumlar sayfanın aşağısında) */
+  function natalAspects(W) {
+    const PNm = id => id === 'asc' ? 'Yükselen' : id === 'mc' ? 'MC' : D.PLANETS[id].tr;
+    const lab = id => id === 'asc' ? 'AS' : id === 'mc' ? 'MC' : G(id);
+    const nmc = id => id === 'asc' || id === 'mc' ? PNm(id) : `${G(id)} ${PNm(id)}`;
+    const row = a => { const as = D.ASPECTS.find(x => x.id === a.type); return `<tr><td>${nmc(a.a)}</td><td style="color:${as.color}"><b>${as.g}</b> ${esc(as.tr.replace(/ \(.*\)/, ''))}</td><td>${nmc(a.b)}</td><td class="num">${a.orb.toFixed(1)}°${a.applying === true ? '<br><small class="muted">yaklaşan</small>' : a.applying === false ? '<br><small class="muted">ayrılan</small>' : ''}</td><td><a href="#asp-${a.a}-${a.b}-${a.type}" aria-label="yorum">›</a></td></tr>`; };
+    const maj = W.aspTexts.filter(a => a.major), min = W.aspTexts.filter(a => !a.major);
+    const RENK = `<p class="muted small">Renkler: <span style="color:#2f7a5a">yeşil/mavi</span> uyumlu, <span style="color:#b23b3b">kırmızı/mor</span> gergin, <span style="color:#8a6d1f">altın</span> kavuşum, <span style="color:#7a6aa8">eflatun</span> yaratıcı (beşlik) açılar. Tablodaki sayı, tam açıdan kaç derece saptığını (tolerans) gösterir; küçük sayı daha güçlü açı demektir. Hangi açıların ve hangi toleransın gösterileceği aşağıdaki "Açı Ayarları"ndan değiştirilir.</p>`;
+    return `<section class="card avoid" id="natAsp"><h2>Natal Gezegen Açıları</h2>
+      <p class="muted small">Doğum anında gezegenlerin birbirleriyle yaptığı açılar (${W.aspects.length} açı, en fazla ${W.opts.maxOrb}° tolerans). Satır sonundaki › işareti, o açının ayrıntılı yorumuna (Leo ve Ptolemaios dahil) götürür.</p>
+      <table class="t natasp"><thead><tr><th>Gezegen</th><th>Açı</th><th>Gezegen</th><th>Orb</th><th></th></tr></thead><tbody>
+        ${maj.map(row).join('') || '<tr><td colspan="5">Majör açı yok.</td></tr>'}
+        ${min.length ? `<tr><td colspan="5" class="muted small" style="padding-top:10px">Minör açılar</td></tr>${min.map(row).join('')}` : ''}
+      </tbody></table>
+      <h3>Açı tablosu</h3>${aspectGrid(W)}${RENK}
     </section>`;
   }
   function aspectGrid(W) {
