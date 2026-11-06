@@ -302,7 +302,7 @@ details.leo>p{padding:0 6px}
     <div class="panel" id="p-soru"></div>
   </div>
 </main>
-<footer>Gezegen konumları astronomy-engine (MIT lisansı) ile hesaplanır; Swiss Ephemeris ile karşılaştırılarak doğrulanmıştır. Sürüm 23 · İnternetsiz çalışır.</footer>
+<footer>Gezegen konumları astronomy-engine (MIT lisansı) ile hesaplanır; Swiss Ephemeris ile karşılaştırılarak doğrulanmıştır. Sürüm 24 · İnternetsiz çalışır.</footer>
 <div id="updBar" class="upd" hidden>Yeni sürüm hazır. <button type="button" class="btn" id="updBtn">Yenile</button></div>
 <script>/*
  MIT
@@ -3917,7 +3917,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     sentez: { ad: 'Astrolog sentezi (önerilen)', text: [
       'Klasik (Helenistik ve İslâmî ilm-i nücûm) ile modern astrolojiyi birlikte bilen deneyimli bir astrolog gibi yorumla. Amacın verileri tek tek sıralamak değil, bir insan hayatı hikâyesi gibi birleştirmek (sentez).',
       'Yöntem:',
-      '1. Önce haritanın ana çerçevesini kur: gündüz/gece haritası, yükselen ve yükselenin efendisi (bulunduğu ev, burç, itibarı), Güneş ve Ay, en güçlü ve en zayıf gezegenler, açıların genel deseni (uyumlu mu gergin mi, hangi gezegenler öne çıkıyor).',
+      '1. Önce haritanın ana çerçevesini kur: gündüz/gece haritası, yükselen ve yükselenin efendisi (bulunduğu ev, burç, itibarı), MC, Güneş ve Ay, gezegenlerin toplandığı burç ve evler (stelyum: yalnızca yükselene bakma, stelyum burcunun ve onun efendisinin konularını da karaktere kat; o burçtan geçen transitleri öne çıkar), en güçlü ve en zayıf gezegenler, açıların genel deseni (uyumlu mu gergin mi, hangi gezegenler öne çıkıyor).',
       '2. Bir yargıya varmak için en az iki ayrı göstergenin aynı yönü işaret etmesini ara (tanıklık ilkesi). Çelişen göstergeleri saklama; ikisini tart ve hangisinin neden ağır bastığını söyle.',
       '3. Yorumu somut hayata bağla: kişinin karakteri, iş ve meslek, para, ilişkiler ve evlilik, aile, sağlığa genel dikkat, iç dünyası. Soyut burç cümleleri yerine "bu kişi gündelik hayatta şöyle davranır, şuna zorlanır, şurada parlar" diye anlat.',
       '4. Zamanlamada katmanları birlikte değerlendir: yıllık intihâ (profeksiyon) ve yılın efendisi, fardar dönemi, ilerletimler, güneş yayı ve transitler. Birden çok katman aynı konuyu aynı dönemde işaret ediyorsa bunu öne çıkar; tek başına bir transiti abartma.',
@@ -3943,6 +3943,14 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       `Yükselen: ${deg(ch.asc)} · MC: ${deg(ch.mc)}`, '', 'Gezegenler (konum, ev, R = geri hareket):'];
     ch.planets.forEach(p => { if (D.PLANETS[p.id]) out.push(`- ${PN(p.id)}: ${deg(p.lon)}, ${p.house}. ev${p.retro ? ', R' : ''}`); });
     out.push('', 'Ev başları: ' + ch.cusps.map((c, i) => `${i + 1}. ${deg(c)}`).join(' · '));
+    const EM = root.AstroApp && root.AstroApp.emphasis && root.AstroApp.emphasis(ch);
+    if (EM) {
+      out.push('', 'Yoğunlaşmalar:');
+      EM.signSt.forEach(st => out.push(`- ${D.SIGNS[st.sign].tr} stelyumu (${st.ids.length} gezegen: ${st.ids.map(PN).join(', ')}); burcun efendisi ${PN(st.ruler)}${st.transitIn.length ? `; şu an ${st.transitIn.map(PN).join(' ve ')} bu burçtan geçiyor` : ''}`));
+      EM.houseSt.forEach(st => out.push(`- ${st.house}. evde ${st.ids.length} gezegen: ${st.ids.map(PN).join(', ')}`));
+      if (!EM.signSt.length) out.push('- Aynı burçta üç ya da daha fazla gezegen yok.');
+      out.push(`- Gezegenler 12 burcun ${EM.used} tanesinde; boş burçlar: ${EM.empty.map(i => D.SIGNS[i].tr).join(', ') || 'yok'}.`);
+    }
     if (withTexts && KY && KY.RISE) {
       const si = Math.floor(((ch.asc % 360) + 360) % 360 / 30), rid = D.SIGNS[si].ruler, rp = ch.planets.find(p => p.id === rid);
       out.push('', 'Alan Leo, The Key to Your Own Nativity — yükselen ve yönetici gezegen:', `- ${D.SIGNS[si].tr} yükselen (paragraf ${KY.RISE[si].n}): "${KY.RISE[si].tr}"`);
@@ -4686,8 +4694,9 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
           ${rowsAst ? `<tr><td colspan="5" class="muted small" style="padding-top:10px">Asteroitler ve sanal noktalar</td></tr>${rowsAst}` : ''}</tbody></table>
           <p class="muted small">Ev sistemi: ${hs}${ch.houseSystem !== ($('#hs').value) ? ' (bu enlemde Placidus hesaplanamadığı için Porphyry kullanıldı)' : ''}. Hız: gezegenin bir günde katettiği yol (eksi = geri gidiyor). <b class="rmark">R</b> geri hareket (retro), <b class="rmark">S</b> durağan (istasyon; yön değiştirmek üzere), <b class="rmark">SR</b> geri harekette durağan. K./G. Düğüm: Kuzey ve Güney Ay Düğümü (Re's ve Zeneb), MC: Tepe noktası.</p></div></div>
         <table class="t cusps"><tr>${cusps.slice(0, 6).join('')}</tr><tr>${cusps.slice(6).join('')}</tr></table>
-        <nav class="toc small"><b>Bu sekmede:</b> <a href="#natAsp">Gezegen açıları</a> · <a href="#natKey">Yükselen ve kişilik</a> · <a href="#natPl">Gezegen yorumları</a> · <a href="#natAspTx">Açı yorumları</a></nav>
+        <nav class="toc small"><b>Bu sekmede:</b> <a href="#natEmp">Yoğunlaşmalar (stelyum)</a> · <a href="#natAsp">Gezegen açıları</a> · <a href="#natKey">Yükselen ve kişilik</a> · <a href="#natPl">Gezegen yorumları</a> · <a href="#natAspTx">Açı yorumları</a></nav>
       </section>
+      ${emphasisSection(ch)}
       ${natalAspects(W)}
       <section class="card avoid"><h2>Element ve Nitelik Dengesi</h2><div class="two"><div>${elRow}</div><div>${mdRow}</div></div>
         <p>${D.ELEMENTS[W.domEl[0][0]].text} ${D.MODES[W.domMd[0][0]].text}</p>
@@ -4915,6 +4924,42 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
       <p class="muted small">Alan Leo'nun <i>The Key to Your Own Nativity</i> kitabının XVIII. bölümünün ("Güneş, Ay ve Gezegenlerin Konumları ve Açıları") tam Türkçe çevirisi. Metin olduğu gibi çevrildi; dönemin dili ve sert ifadeleri değiştirilmedi. Leo okura "sen" diye hitap eder. Her açının altındaki "Alan Leo'ya göre" kutusu bu bölümden gelir. Leo Plüton'u bilmiyordu; Yükselen ve MC'ye açıları bu bölümde yorumlamaz. ${esc(KY.MISSING_95)}</p>
       <details><summary>Leo'nun bölüm girişi (tam çeviri)</summary>${KY.ASP_INTRO.map(p => `<p>${esc(p)}</p>`).join('')}<p class="muted small">s. 84–85.</p></details>
       <details><summary>Bölümdeki bütün açı yorumları (${KY.ASP.length} metin)</summary>${groups}</details>
+    </section>`;
+  }
+  /* Yoğunlaşmalar: stelyum (aynı burçta/evde 3+ gezegen), boş burçlar, yükselen ve MC */
+  const EMP_BODIES = ['sun', 'moon', 'mercury', 'venus', 'mars', 'jupiter', 'saturn', 'uranus', 'neptune', 'pluto'];
+  function emphasis(ch, nowMs) {
+    const ps = ch.planets.filter(p => EMP_BODIES.includes(p.id));
+    const sg = lon => Math.floor((((lon % 360) + 360) % 360) / 30);
+    const bySign = {}, byHouse = {};
+    ps.forEach(p => { (bySign[sg(p.lon)] = bySign[sg(p.lon)] || []).push(p.id); (byHouse[p.house] = byHouse[p.house] || []).push(p.id); });
+    const signSt = Object.entries(bySign).filter(([, v]) => v.length >= 3).map(([k, v]) => ({ sign: +k, ids: v })).sort((a, b) => b.ids.length - a.ids.length);
+    const houseSt = Object.entries(byHouse).filter(([, v]) => v.length >= 3).map(([k, v]) => ({ house: +k, ids: v })).sort((a, b) => b.ids.length - a.ids.length);
+    const empty = D.SIGNS.map((x, i) => i).filter(i => !bySign[i]);
+    const now = new Date(nowMs || Date.now());
+    const slow = ['jupiter', 'saturn', 'uranus', 'neptune', 'pluto'].map(id => ({ id, sign: sg(C.lonOf(id, now)) }));
+    signSt.forEach(st => {
+      st.ruler = D.SIGNS[st.sign].ruler;
+      const rp = ch.planets.find(p => p.id === st.ruler); st.rulerSign = rp ? sg(rp.lon) : null; st.rulerHouse = rp ? rp.house : null;
+      st.transitIn = slow.filter(x => x.sign === st.sign).map(x => x.id);
+      st.transitHard = slow.filter(x => [3, 6, 9].includes((x.sign - st.sign + 12) % 12)).map(x => ({ id: x.id, rel: (x.sign - st.sign + 12) % 12 === 6 ? 'karşı burçtan' : 'kare burçtan' }));
+    });
+    return { signSt, houseSt, empty, used: Object.keys(bySign).length, asc: sg(ch.asc), mc: sg(ch.mc) };
+  }
+  function emphasisSection(ch) {
+    const E = emphasis(ch), PNm = id => D.PLANETS[id].tr, list = ids => ids.map(id => `${G(id)} ${PNm(id)}`).join(', ');
+    const HA = h => (D.HOUSES[h - 1] || {}).area || '';
+    const sBlk = E.signSt.map(st => { const S = D.SIGNS[st.sign]; return `<div class="item"><h3>${S.g} ${S.tr} stelyumu — ${st.ids.length} gezegen</h3>
+      <p><b>${list(st.ids)}</b> aynı burçta. Bu gezegenlerin hepsi ${S.tr} burcunun tarzıyla çalışır; bu yüzden yalnızca yükselen burca bakmak yetmez, ${S.tr} burcunun nitelikleri de karakterde belirgin olur. ${esc(S.core)}</p>
+      <p>Bu burcun efendisi ${G(st.ruler)} ${PNm(st.ruler)}${st.rulerSign != null ? `, haritada ${D.SIGNS[st.rulerSign].tr} burcunda ve ${st.rulerHouse}. evde` : ''}; stelyumun nasıl işlediği büyük ölçüde onun durumuna bağlıdır.</p>
+      <p><b>Transitlerde:</b> ${S.tr} burcundan ya da onun karşısındaki ve kare burçlarından geçen yavaş gezegenler bu gezegenlerin hepsine birden dokunur; o dönemler hayatta daha hissedilir geçer.${st.transitIn.length ? ` <b>Şu an ${st.transitIn.map(PNm).join(' ve ')} bu burçtan geçiyor.</b>` : ''}${st.transitHard.length ? ` Şu an ${st.transitHard.map(x => `${PNm(x.id)} ${x.rel}`).join(', ')} bu gruba gergin açı yapıyor.` : ''} Ayrıntılı tarihler "Takvim" ve "Bugünkü Gökyüzü" sekmelerinde.</p></div>`; }).join('');
+    const hBlk = E.houseSt.map(st => `<p><b>${st.house}. evde ${st.ids.length} gezegen</b> (${list(st.ids)}): hayatın ${HA(st.house)} alanı öne çıkar.</p>`).join('');
+    return `<section class="card avoid" id="natEmp"><h2>Haritanın Yoğunlaştığı Yerler</h2>
+      ${E.signSt.length ? sBlk : '<p>Bu haritada aynı burçta üç ya da daha fazla gezegen (stelyum) yok; gezegenler burçlara dağılmış.</p>'}
+      ${hBlk}
+      <p>Gezegenler 12 burcun <b>${E.used}</b> tanesinde. ${E.empty.length ? `Gezegen bulunmayan burçlar: ${E.empty.map(i => D.SIGNS[i].tr).join(', ')}. Bu, o burçların konularının hayatta olmadığı anlamına gelmez; yalnızca o burçlarda doğum anında gezegen yoktu.` : ''}</p>
+      <p>Bunlara ek olarak <b>Yükselen ${D.SIGNS[E.asc].g} ${D.SIGNS[E.asc].tr}</b> (dışa dönük yüz, beden, hayata yaklaşım) ve <b>MC ${D.SIGNS[E.mc].g} ${D.SIGNS[E.mc].tr}</b> (haritanın tepe noktası: meslek, toplumdaki yer) burçları da haritanın tonunu belirler.</p>
+      <p class="muted small">"Stelyum" modern astrolojinin terimidir (genelde aynı burçta ya da evde 3 ve üzeri gezegen; burada Güneş'ten Plüton'a 10 gezegen sayıldı, Ay düğümleri ve asteroitler hariç). Klasik gelenekte ayrı bir adı yoktur, ama bir burçta toplanan gezegenler o burcun ve efendisinin önemini artırır.</p>
     </section>`;
   }
   /* Natal gezegen açıları: tek bakışta liste + tablo (ayrıntılı yorumlar sayfanın aşağısında) */
@@ -5187,7 +5232,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     </section>`;
   }
 
-  window.AstroApp = Object.assign(window.AstroApp || {}, { keyHouseReading });
+  window.AstroApp = Object.assign(window.AstroApp || {}, { keyHouseReading, emphasis });
   document.addEventListener('DOMContentLoaded', initForm);
 })();
 </script>
