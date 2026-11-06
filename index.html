@@ -299,7 +299,7 @@ details.leo>p{padding:0 6px}
     <div class="panel" id="p-soru"></div>
   </div>
 </main>
-<footer>Gezegen konumları astronomy-engine (MIT lisansı) ile hesaplanır; Swiss Ephemeris ile karşılaştırılarak doğrulanmıştır. Sürüm 21 · İnternetsiz çalışır.</footer>
+<footer>Gezegen konumları astronomy-engine (MIT lisansı) ile hesaplanır; Swiss Ephemeris ile karşılaştırılarak doğrulanmıştır. Sürüm 22 · İnternetsiz çalışır.</footer>
 <div id="updBar" class="upd" hidden>Yeni sürüm hazır. <button type="button" class="btn" id="updBtn">Yenile</button></div>
 <script>/*
  MIT
@@ -1978,18 +1978,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     const top = rows[0], second = rows[1];
     const govs = [top.id];
     if (second && second.score > 0 && second.score >= 0.75 * top.score) govs.push(second.id);
-    // İtibar (onurlu konum): makam, hayyiz, köşe, yanma
-    const honour = id => {
-      const zp = Z.planets.find(x => x.id === id);
-      const reasons = []; let s = 0;
-      if (zp.dg.dom || zp.dg.exalt || zp.dg.trip) { s += 1; reasons.push('kendi makamında (hâne/şeref/müselles)'); }
-      if (zp.dg.det || zp.dg.fall) { s -= 1; reasons.push('vebâl ya da hubûtta'); }
-      if (zp.inSect) { s += 1; reasons.push('doğumun hayyizine uygun'); } else { s -= 1; reasons.push('hayyize aykırı'); }
-      if ([1, 4, 7, 10].includes(zp.house)) { s += 1; reasons.push(`köşe beytte (${zp.house}.)`); }
-      else if ([3, 6, 9, 12].includes(zp.house)) { s -= 1; reasons.push(`düşen beytte (${zp.house}.)`); }
-      if (zp.combust === 'muhterik') { s -= 1; reasons.push('Güneş altında yanık'); }
-      return { id, score: s, good: s >= 1, reasons };
-    };
+    const honour = id => honourOf(Z, id);
     const hon = govs.map(honour);
     const pairKey = govs.length === 2 ? (CAND.indexOf(govs[0]) < CAND.indexOf(govs[1]) ? govs[0] + '+' + govs[1] : govs[1] + '+' + govs[0]) : null;
     // Ay'ın hâli
@@ -2003,7 +1992,19 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
   }
   function Ax() { return root.Astronomy || require('astronomy-engine'); }
 
-  root.AstroPtolCalc = { compute, moonSepApp };
+  // İtibar (onurlu konum): makam, hayyiz, köşe, yanma
+  function honourOf(Z, id) {
+      const zp = Z.planets.find(x => x.id === id);
+      const reasons = []; let s = 0;
+      if (zp.dg.dom || zp.dg.exalt || zp.dg.trip) { s += 1; reasons.push('kendi makamında (hâne/şeref/müselles)'); }
+      if (zp.dg.det || zp.dg.fall) { s -= 1; reasons.push('vebâl ya da hubûtta'); }
+      if (zp.inSect) { s += 1; reasons.push('doğumun hayyizine uygun'); } else { s -= 1; reasons.push('hayyize aykırı'); }
+      if ([1, 4, 7, 10].includes(zp.house)) { s += 1; reasons.push(`köşe beytte (${zp.house}.)`); }
+      else if ([3, 6, 9, 12].includes(zp.house)) { s -= 1; reasons.push(`düşen beytte (${zp.house}.)`); }
+      if (zp.combust === 'muhterik') { s -= 1; reasons.push('Güneş altında yanık'); }
+      return { id, score: s, good: s >= 1, reasons };
+  }
+  root.AstroPtolCalc = { compute, moonSepApp, honourOf };
   if (typeof module !== 'undefined') module.exports = root.AstroPtolCalc;
 })(typeof window !== 'undefined' ? window : globalThis);
 </script>
@@ -4603,7 +4604,7 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     const off = ch.offsetMin / 60;
     msg(`Hesaplandı. Kullanılan UTC farkı: ${off >= 0 ? '+' : ''}${off} saat (${ch.offsetSource === 'manual' ? 'elle girildi' : 'saat dilimi veritabanından'}). Dünya saatiyle doğum: ${ch.utc.toISOString().slice(0, 16).replace('T', ' ')}.`);
     $('#results').hidden = false;
-    LAST = { ch }; renderSummary(ch, W, Z, K); renderWestern(ch, W); renderZayice(ch, W, Z);
+    LAST = { ch, Z }; renderSummary(ch, W, Z, K); renderWestern(ch, W); renderZayice(ch, W, Z);
     let X = null;
     try { X = window.AstroSkyUI.render(ch, W, Z, Date.now()); } catch (e) { console.error(e); msg('Göksel olaylar bölümü hesaplanırken hata: ' + e.message, true); }
     try { const pr = window.AstroProgUI.render(ch, Date.now(), window.AstroSkyUI.residence(ch.input)); if (X) X.prog = pr; } catch (e) { console.error(e); msg('İlerletim bölümü hesaplanırken hata: ' + e.message, true); }
@@ -4838,7 +4839,19 @@ return new kd(this.curr.time,a,b)};$jscomp.global.Object.defineProperties(H.prot
     const classic = t => {
       if (!PT || !CAND.includes(t.a) || !CAND.includes(t.b)) return '';
       const k = CAND.indexOf(t.a) < CAND.indexOf(t.b) ? t.a + '+' + t.b : t.b + '+' + t.a; const tx = PT.PAIR[k]; if (!tx) return '';
-      return `<details class="small"><summary>Klasik kaynak: Ptolemaios bu iki gezegenin birleşimi hakkında ne der?</summary><p class="muted">Not: Ptolemaios bu metni açı türüne göre değil, iki gezegen birlikte "ruhun yöneticisi" olduğunda verir; "itibarlı" ve "karşıt" ayrımı gezegenlerin konumuna göredir. Bu haritada ruhun yöneticisinin kim olduğu Zâyiçe sekmesinde hesaplanır. Kaynak: ${esc(PT.REF)}.</p><p><b>İtibarlı konumda:</b> ${esc(tx[0])}</p><p><b>Karşıt konumda:</b> ${esc(tx[1])}</p></details>`;
+      const PC = window.AstroPtolCalc, Zc = LAST && LAST.Z;
+      let hd = null, gov = null;
+      try { if (PC && Zc) { hd = [PC.honourOf(Zc, t.a), PC.honourOf(Zc, t.b)]; gov = PC.compute(LAST.ch, Zc).govs; } } catch (e) { console.error(e); }
+      const nm = id => D.PLANETS[id].tr;
+      if (!hd) return `<details class="small"><summary>Klasik kaynak: Ptolemaios bu iki gezegenin birleşimi hakkında ne der?</summary><p><b>İtibarlı konumda:</b> ${esc(tx[0])}</p><p><b>Karşıt konumda:</b> ${esc(tx[1])}</p></details>`;
+      const ng = hd.filter(h => h.good).length, which = ng === 2 ? 0 : ng === 0 ? 1 : -1;
+      const why = hd.map(h => `<b>${nm(h.id)}</b>: ${h.reasons.join(', ')} → <b>${h.good ? 'itibarlı' : 'itibarsız'}</b>`).join('<br>');
+      const isGov = gov && gov.length === 2 && gov.includes(t.a) && gov.includes(t.b);
+      const govNote = isGov ? 'Bu haritada bu iki gezegen gerçekten "ruhun yöneticisi"; metin doğrudan bu haritaya uygulanır.' : `Ptolemaios bu metni, iki gezegen birlikte "ruhun yöneticisi" olduğunda verir. Bu haritada ruhun yöneticisi ${gov ? gov.map(nm).join(' ve ') : '—'}; bu yüzden aşağıdaki metin karakterin tamamını değil, yalnızca bu ikisinin birleşik etkisini anlatan ikincil bir renk olarak okunmalı.`;
+      const head = which === 0 ? 'Bu haritada <b>ikisi de itibarlı</b>; geçerli olan "İtibarlı konumda" metnidir:' : which === 1 ? 'Bu haritada <b>ikisi de itibarsız</b>; geçerli olan "Karşıt konumda" metnidir:' : 'Bu haritada <b>biri itibarlı, diğeri itibarsız</b>. Ptolemaios bu durumda iki yönün karışarak birlikte işlediğini söyler; aşağıdaki iki metin birlikte okunur:';
+      const main = which === -1 ? `<p><b>İtibarlı yönü:</b> ${esc(tx[0])}</p><p><b>Karşıt yönü:</b> ${esc(tx[1])}</p>` : `<p>${esc(tx[which])}</p>`;
+      const other = which === -1 ? '' : `<details class="small"><summary>Öbür durumun metni (bu haritaya uymuyor)</summary><p class="muted">${esc(tx[1 - which])}</p></details>`;
+      return `<details class="small"><summary>Klasik kaynak: Ptolemaios bu iki gezegenin birleşimi hakkında ne der?</summary><p>${head}</p>${main}${other}<p class="muted small">Neden? ${why}<br>(Ölçüt: kendi makamında olmak, doğumun gündüz/gece hayyizine uygunluk, köşe evde olmak artı; vebal/hubût, hayyize aykırılık, düşen ev ve Güneş altında yanmak eksi.) ${govNote} Kaynak: ${esc(PT.REF)}.</p></details>`;
     };
     const KY = window.AstroKey, KCLS = { conj: 'conj', trine: 'ben', sext: 'ben', semisext: 'ben', square: 'adv', opp: 'adv', semisq: 'adv', sesqui: 'adv' };
     const KCLS_TR = { conj: 'kavuşum', ben: 'uğurlu (benefik) açı', adv: 'sıkıntılı (adverse) açı' };
